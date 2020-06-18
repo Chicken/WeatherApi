@@ -106,7 +106,7 @@ app.get('/api/weather', (req,res)=>{
 		dailyTempAvg: yesterdayAverage,
 		humidity: latestTemp.hum,
 		pressure: latestPressure.pressure,
-		lightness: latestLight.light,
+		lightness: Math.round(latestLight.light),
 		dewPoint: parseFloat(dewPoint(latestTemp.temp, latestTemp.hum).toFixed(1)),
 		absoluteHumidity: parseFloat(absoluteHumidity(latestTemp.temp, latestTemp.hum).toFixed(1)),
 		feelsLikeTemp: feelsLikeTemp(latestTemp.temp, values[values.length-1].speed)

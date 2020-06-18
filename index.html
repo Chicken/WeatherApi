@@ -53,8 +53,6 @@
 				feelsLikeTemp
 			} = data;
 
-			console.log(data)
-		
 			document.getElementById('wind').innerHTML =
 			`Nopeus (nyt): ${windSpeedNowText} (${windSpeedNow}m/s)
 			Suunta (nyt): ${windDirNowText} (${windDirNow}&#176;)
@@ -73,12 +71,12 @@
 			Absoluuttinen kosteus: ${absoluteHumidity}g/m3
 			Tuntuu kuin: ${feelsLikeTemp}&#176;C`
 			.split('\n').join('<br>')
-		
+
 			draw(windDirAvg)
 		}
 
 		updateData()
-		setInterval(updateData, 5000)
+		setInterval(updateData, 2000)
 	
 	</script>
 </body>
