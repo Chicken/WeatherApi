@@ -1,0 +1,67 @@
+<html>
+<head>
+<title>Tuuli</title>
+</head>
+<body style="background-color: lightblue;">
+<h1 style="font-size:60px">Tuuli (10min)</h1>
+<p style="font-size: 40px" id="wind"></p>
+<h1 style="font-size:60px">Muut</h1>
+<p style="font-size: 40px" id="other"></p>
+<canvas width="500" height="500" id="direction"></canvas>
+<script>
+
+const canvas = document.getElementById('direction');
+const ctx = canvas.getContext('2d');
+const tausta = new Image();
+tausta.src = './media/tausta.png';
+const nuoli = new Image();
+nuoli.src = './media/nuoli.png';
+
+async function draw(degrees){
+	await ctx.drawImage(tausta, 0, 0)
+	await ctx.save();
+    await ctx.translate(canvas.width/2,canvas.height/2);
+    await ctx.rotate(degrees*Math.PI/180);
+    await ctx.drawImage(nuoli,-nuoli.width/2,-nuoli.width/2);
+    await ctx.restore();
+}
+
+async function updateData() {
+	let data = await fetch('/api/parsed');
+	data = await data.json();
+
+	let speed = "test"; //await postData('/api/speed', {speed: data[data.length-1].speed})
+	let direction = "test"; //await postData('/api/direction', {direction: data[data.length-1].direction})
+	let speed2 = arrAvg(data.map(d=>d.speed));
+	let avgSpeed = "test"; //await postData('/api/speed/', {speed: parseFloat(arrAvg(data.map(d=>d.speed)).toFixed(1))})
+	let avgDirection = "test"; //await postData('/api/direction', {direction: Math.floor(get_average(data.map(d=>d.direction)))})
+
+	document.getElementById('wind').innerHTML =
+	`Nopeus (nyt): ${speed.speed} (${data[data.length-1].speed}m/s)
+	Suunta (nyt): ${direction.direction} (${data[data.length-1].direction}&#176;)
+	Puuska nopeus: (${Math.max(...data.map(d=>d.speed))}m/s)
+	Tuulen nopeuden keskiarvo: ${avgSpeed.speed} (${parseFloat(arrAvg(data.map(d=>d.speed)).toFixed(1))}m/s)
+	Tuulen suunnan keskiarvo: ${avgDirection.direction} (${Math.floor(get_average(data.map(d=>d.direction)))}&#176;)`
+	.split('\n').join('<br>');
+
+	document.getElementById('other').innerHTML =
+	`Lämpötila: ${temp}&#176;C
+	Vuorokauden keskilämpötila: ${avg == undefined ? "Ei tarpeeksi dataa." : `${avg.toFixed(1)}&#176;C`}
+	Kosteus: ${hum}%
+	Ilmanpaine: ${pressure}hPa
+	Valoisuus: ${light}lx
+	Kastepiste: ${Math.round(dew_point(temp,hum))}&#176;C
+	Absoluuttinen kosteus: ${Math.round(absolute_humidity(temp,hum))}g/m3
+	Tuntuu kuin: ${feels_like(temp,speed2).toFixed(1)}&#176;C`
+	.split('\n').join('<br>')
+
+	draw(Math.floor(get_average(data.map(d=>d.direction))), data)
+}
+
+updateData()
+setInterval(updateData, 1000)
+
+</script>
+
+</body>
+</html>
