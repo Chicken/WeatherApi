@@ -1,13 +1,13 @@
 <html>
 <head>
-	<title>Tuuli</title>
+	<title>Weather</title>
 	<link rel="stylesheet" type="text/css" href="style.css">
 </head>
 	<body>
-
+		
 		<div class="wrapper">
 
-			<div class="left">
+			<div class="sidebyside">
 				<h1>Tuuli (10min)</h1>
 				<p>
 					Nopeus (nyt):<br>
@@ -29,18 +29,19 @@
 				</p>
 			</div>
 
-			<div class="right">
+			<div class="sidebyside">
 				<h1>&nbsp;</h1>
 				<p id="wind"></p>
 				<h1>&nbsp;</h1>
 				<p id="other"></p>
 			</div>
 
+			<div class="canvascontainer">
+				<canvas width="500" height="500" id="direction"></canvas>
+			</div>
 		</div>
 
-		<canvas width="500" height="500" id="direction"></canvas>
-
-		<p>&copy; Antti.Codes 2020</p>
+		<p class="cr">&copy; Antti.Codes 2020</p>
 
 		<script>
 
@@ -87,21 +88,21 @@
 				} = data;
 
 				document.getElementById('wind').innerHTML =
-				`${windSpeedNowText} (${windSpeedNow}m/s)
-				${windDirNowText} (${windDirNow}&#176;)
-				${windGustText} (${windGust}m/s)
-				${windSpeedAvgText} (${windSpeedAvg}m/s)
-				${windDirAvgText} (${windDirAvg}&#176;)`
+				`${windSpeedNowText} (${windSpeedNow} m/s)
+				${windDirNowText} (${windDirNow} &#176;)
+				${windGustText} (${windGust} m/s)
+				${windSpeedAvgText} (${windSpeedAvg} m/s)
+				${windDirAvgText} (${windDirAvg} &#176;)`
 				.split('\n').join('<br>');
 			
 				document.getElementById('other').innerHTML =
-				`${temperature}&#176;C
-				${dailyTempAvg == undefined ? "Ei tarpeeksi dataa." : `${dailyTempAvg}&#176;C`}
-				${humidity}%
-				${pressure}hPa
-				${lightness}lx
-				${dewPoint}&#176;C
-				${absoluteHumidity}g/m3
+				`${temperature} &#176;C
+				${dailyTempAvg == undefined ? "Ei tarpeeksi dataa." : `${dailyTempAvg} &#176;C`}
+				${humidity} %
+				${pressure} hPa
+				${lightness} lx
+				${dewPoint} &#176;C
+				${absoluteHumidity} g/m³
 				${feelsLikeTemp}&#176;C`
 				.split('\n').join('<br>')
 

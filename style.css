@@ -1,30 +1,40 @@
 h1 {
-    font-size: 3.2vw;
+    font-size: 2.6vw;
 }
 
 p {
-    font-size: 2.2vw;
+    font-size: 1.6vw;
 }
 body {
+    overflow-x: hidden;
+    overflow-y: scroll;
     background-color: lightblue;
 }
 
 .wrapper {
-    width: 100vw;
-    height: 100vh;
-    margin: auto;
+    width: 100%;
+    height: 46vw;
+    margin: 1vw;
     padding: 5px;
 }
   
-.left {
-    width: 25vw;
-    height: 100vh;
+.sidebyside {
+    height: 100%;
+    overflow: auto;
+    overflow-wrap: break-word;
+    width: 25%;
     float: left;
-    margin: auto;
 }
-  
-.right {
-    height: 100vh;
-    width: 50vw;
-    margin-left: 25vw;
+
+.canvascontainer {
+    height: 100%;
+    overflow: auto;
+    overflow-wrap: break-word;
+    width: 40%;
+    float: left;
+}
+
+canvas {
+    margin: 15%;
+    width: 70%; 
 }
