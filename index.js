@@ -46,17 +46,13 @@ let currentMinutes = currentTime.getMinutes()
 let timeTillStart = (24*60) - (currentHours * 60 + currentMinutes)
 let interval
 let timeout = setTimeout(()=>{
-  console.log(formatDate(new Date())+"timeout start", todayTemps, yesterdayAverage)
   todayTemps.push(latestTemp.temp)
-  console.log(formatDate(new Date())+"timeout end", todayTemps, yesterdayAverage)
   interval = setInterval(()=>{
-    console.log(formatDate(new Date())+"setInterval start bois", todayTemps, yesterdayAverage)
     todayTemps.push(latestTemp.temp)
     if(todayTemps.length == 8) {
       yesterdayAverage = todayTemps.reduce((a,b) => a + b) / 8
       todayTemps = []
     }
-    console.log(formatDate(new Date())+"setInterval end bois", todayTemps, yesterdayAverage)
   },3*60*60*1000)
 }, timeTillStart * 60 * 1000)
 
@@ -64,6 +60,11 @@ let timeout = setTimeout(()=>{
 app.get('/',(req, res)=>{
   if(LOGGING_LEVEL>1) console.log(formatDate(new Date())+'WEBPAGE: visited');
   res.sendFile(__dirname + '/index.html')
+})
+
+app.get('/style.css',(req, res)=>{
+  if(LOGGING_LEVEL>1) console.log(formatDate(new Date())+'WEBPAGE: visited');
+  res.sendFile(__dirname + '/style.css')
 })
 
 //public media files

@@ -1,83 +1,116 @@
 <html>
 <head>
 	<title>Tuuli</title>
+	<link rel="stylesheet" type="text/css" href="style.css">
 </head>
-	<body style="background-color: lightblue;">
-	<h1 style="font-size:60px">Tuuli (10min)</h1>
-	<p style="font-size: 40px" id="wind"></p>
-	<h1 style="font-size:60px">Muut</h1>
-	<p style="font-size: 40px" id="other"></p>
-	<canvas width="500" height="500" id="direction"></canvas>
-	<p>&copy; Antti.Codes 2020</p>
-	<script>
+	<body>
 
-		const canvas = document.getElementById('direction');
-		const ctx = canvas.getContext('2d');
-		const tausta = new Image();
-		tausta.src = './media/tausta.png';
-		const nuoli = new Image();
-		nuoli.src = './media/nuoli.png';
+		<div class="wrapper">
 
-		async function draw(degrees){
-			await ctx.drawImage(tausta, 0, 0)
-			await ctx.save();
-		    await ctx.translate(canvas.width/2,canvas.height/2);
-		    await ctx.rotate(degrees*Math.PI/180);
-		    await ctx.drawImage(nuoli,-nuoli.width/2,-nuoli.width/2);
-		    await ctx.restore();
-		}
+			<div class="left">
+				<h1>Tuuli (10min)</h1>
+				<p>
+					Nopeus (nyt):<br>
+					Suunta (nyt):<br>
+					Puuska nopeus:<br>
+					Nopeuden keskiarvo:<br>
+					Suunnan keskiarvo:<br>
+				</p>
+				<h1>Muut</h1>
+				<p>
+					Lämpötila:<br>
+					Keskilämpötila:<br>
+					Kosteus:<br>
+					Ilmanpaine:<br>
+					Valoisuus:<br>
+					Kastepiste:<br>
+					Absoluuttinen kosteus:<br>
+					Tuntuu kuin:<br>
+				</p>
+			</div>
 
-		async function updateData() {
+			<div class="right">
+				<h1>&nbsp;</h1>
+				<p id="wind"></p>
+				<h1>&nbsp;</h1>
+				<p id="other"></p>
+			</div>
+
+		</div>
+
+		<canvas width="500" height="500" id="direction"></canvas>
+
+		<p>&copy; Antti.Codes 2020</p>
+
+		<script>
+
+			const canvas = document.getElementById('direction');
+			const ctx = canvas.getContext('2d');
+			const tausta = new Image();
+			tausta.src = './media/tausta.png';
+			const nuoli = new Image();
+			nuoli.src = './media/nuoli.png';
+
+			async function draw(degrees){
+				await ctx.drawImage(tausta, 0, 0)
+				await ctx.save();
+			    await ctx.translate(canvas.width/2,canvas.height/2);
+			    await ctx.rotate(degrees*Math.PI/180);
+			    await ctx.drawImage(nuoli,-nuoli.width/2,-nuoli.width/2);
+			    await ctx.restore();
+			}
+
+			async function updateData() {
+			
+				let data = await fetch('/api/weather');
+				data = await data.json();
+			
+				let {
+					windSpeedNow,
+					windSpeedNowText,
+					windDirNow,
+					windDirNowText,
+					windGust,
+					windGustText,
+					windSpeedAvg,
+					windSpeedAvgText,
+					windDirAvg,
+					windDirAvgText,
+					temperature,
+					dailyTempAvg,
+					humidity,
+					pressure,
+					lightness,
+					dewPoint,
+					absoluteHumidity,
+					feelsLikeTemp
+				} = data;
+
+				document.getElementById('wind').innerHTML =
+				`${windSpeedNowText} (${windSpeedNow}m/s)
+				${windDirNowText} (${windDirNow}&#176;)
+				${windGustText} (${windGust}m/s)
+				${windSpeedAvgText} (${windSpeedAvg}m/s)
+				${windDirAvgText} (${windDirAvg}&#176;)`
+				.split('\n').join('<br>');
+			
+				document.getElementById('other').innerHTML =
+				`${temperature}&#176;C
+				${dailyTempAvg == undefined ? "Ei tarpeeksi dataa." : `${dailyTempAvg}&#176;C`}
+				${humidity}%
+				${pressure}hPa
+				${lightness}lx
+				${dewPoint}&#176;C
+				${absoluteHumidity}g/m3
+				${feelsLikeTemp}&#176;C`
+				.split('\n').join('<br>')
+
+				draw(windDirAvg)
+			}
+
+			updateData()
+			setInterval(updateData, 2000)
 		
-			let data = await fetch('/api/weather');
-			data = await data.json();
-		
-			let {
-				windSpeedNow,
-				windSpeedNowText,
-				windDirNow,
-				windDirNowText,
-				windGust,
-				windGustText,
-				windSpeedAvg,
-				windSpeedAvgText,
-				windDirAvg,
-				windDirAvgText,
-				temperature,
-				dailyTempAvg,
-				humidity,
-				pressure,
-				lightness,
-				dewPoint,
-				absoluteHumidity,
-				feelsLikeTemp
-			} = data;
-
-			document.getElementById('wind').innerHTML =
-			`Nopeus (nyt): ${windSpeedNowText} (${windSpeedNow}m/s)
-			Suunta (nyt): ${windDirNowText} (${windDirNow}&#176;)
-			Puuska nopeus: ${windGustText} (${windGust}m/s)
-			Tuulen nopeuden keskiarvo: ${windSpeedAvgText} (${windSpeedAvg}m/s)
-			Tuulen suunnan keskiarvo: ${windDirAvgText} (${windDirAvg}&#176;)`
-			.split('\n').join('<br>');
-		
-			document.getElementById('other').innerHTML =
-			`Lämpötila: ${temperature}&#176;C
-			Vuorokauden keskilämpötila: ${dailyTempAvg == undefined ? "Ei tarpeeksi dataa." : `${dailyTempAvg}&#176;C`}
-			Kosteus: ${humidity}%
-			Ilmanpaine: ${pressure}hPa
-			Valoisuus: ${lightness}lx
-			Kastepiste: ${dewPoint}&#176;C
-			Absoluuttinen kosteus: ${absoluteHumidity}g/m3
-			Tuntuu kuin: ${feelsLikeTemp}&#176;C`
-			.split('\n').join('<br>')
-
-			draw(windDirAvg)
-		}
-
-		updateData()
-		setInterval(updateData, 2000)
-	
-	</script>
+		</script>
 </body>
 </html>
