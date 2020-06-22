@@ -14,20 +14,18 @@ rl.on("line", (input)=>{
 })
 
 //dependencies and variables
+const bent = require("bent");
 const SerialPort = require('serialport');
-const SHT31 = require('raspi-node-sht31')
-const sht31 = new SHT31()
+const SHT31 = require('raspi-node-sht31');
+const sht31 = new SHT31();
 const BMP180 = require('bmp180-sensor');
-const i2c = require('i2c-bus')
+const i2c = require('i2c-bus');
 const Readline = require('@serialport/parser-readline');
 const port = new SerialPort('/dev/serial0', { baudRate: 9600 });
 const parser = port.pipe(new Readline({ delimiter: '\n' }));
 const express = require('express');
 const app = express();
-//const bodyParser = require('body-parser');
-//app.use(bodyParser.urlencoded({ extended: true }));
-//app.use(bodyParser.json());
-
+require("dotenv").config();
 
 let values = [],
     raw = [],
@@ -35,7 +33,8 @@ let values = [],
     yesterdayAverage = undefined,
     latestTemp = {},
     latestPressure = {},
-    latestLight = {};
+    latestLight = {},
+    latestForecast = {};
 
 const LOGGING_LEVEL = 2; //0=nothing, 1=important, 2=website, 3=all the useless shit
 
@@ -56,14 +55,23 @@ let timeout = setTimeout(()=>{
   },3*60*60*1000)
 }, timeTillStart * 60 * 1000)
 
+//forecast fetch loop
+async function fetchForecast() {
+  if(LOGGING_LEVEL>2) console.log(formatDate(new Date())+'THIRD PARTY: forecast data fetched')
+  latestForecast = await bent(200, "json")(`https://api.openweathermap.org/data/2.5/onecall?lat=65.012615&lon=25.471453&units=metric&lang=fi&exclude=minutely&appid=${process.env.key}`)
+}
+fetchForecast()
+let interval2 = setInterval(fetchForecast,1000*60*10)
+
 //main page
 app.get('/',(req, res)=>{
   if(LOGGING_LEVEL>1) console.log(formatDate(new Date())+'WEBPAGE: visited');
   res.sendFile(__dirname + '/index.html')
 })
 
+//css
 app.get('/style.css',(req, res)=>{
-  if(LOGGING_LEVEL>1) console.log(formatDate(new Date())+'WEBPAGE: visited');
+  if(LOGGING_LEVEL>2) console.log(formatDate(new Date())+'WEBPAGE: css loaded');
   res.sendFile(__dirname + '/style.css')
 })
 
@@ -83,10 +91,48 @@ app.get('/api', (req,res)=>{
     GET /api/raw - raw wind data <br>
     GET /api/parsed - parsed wind data <br>
     GET /api/weather - all the weather info <br>
+    GET /api/forecast - latest forecast fetched from openweathermap <br>
     GET /api/gen/compass - image of wind dir compass, requires authentication<br>
     <br>
     &copy; Antti.Codes 2020`
   )
+})
+
+//forecast
+app.get('/api/forecast', (req,res)=>{
+  if(LOGGING_LEVEL>2) console.log(formatDate(new Date())+'API: forecasts fetched');
+  res.send({
+    today: {
+      sunrise: latestForecast.current.sunrise,
+      sunset: latestForecast.current.sunset,
+      temp: latestForecast.daily[0].temp,
+      feels: latestForecast.daily[0].feels_like,
+      uv: latestForecast.daily[0].uvi,
+      windspeed: latestForecast.daily[0].wind_speed,
+      summary: latestForecast.daily[0].weather[0].description,
+      icon: latestForecast.daily[0].weather[0].icon
+    },
+    week: latestForecast.daily.map(v=>{
+      return {
+        temp: {
+          max: v.temp.max,
+          min: v.temp.min
+        },
+        icon: v.weather[0].icon,
+        windspeed: v.wind_speed,
+        sunrise: v.sunrise,
+        sunset: v.sunset,
+      }
+    })
+  })
+})
+
+
+
+//forecast but raw 3rd party api response
+app.get('/api/forecast/all', (req,res)=>{
+  if(LOGGING_LEVEL>2) console.log(formatDate(new Date())+'API: all forecasts fetched');
+  res.send(latestForecast)
 })
 
 //all the weather data
@@ -104,7 +150,7 @@ app.get('/api/weather', (req,res)=>{
     windDirAvg: Math.round(getAverage(values.map(v=>v.direction)).toFixed(1)),
     windDirAvgText: getDirectionText(getAverage(values.map(v=>v.direction))),
 		temperature: latestTemp.temp,
-		dailyTempAvg: yesterdayAverage,
+		dailyTempAvg: yesterdayAverage ? parseFloat(yesterdayAverage.toFixed(1)) : undefined,
 		humidity: latestTemp.hum,
 		pressure: latestPressure.pressure,
 		lightness: Math.round(latestLight.light),

@@ -27,6 +27,15 @@
 					Absoluuttinen kosteus:<br>
 					Tuntuu kuin:<br>
 				</p>
+				<h1>Ennustus tänään</h1>
+				<p>
+
+				</p>
+				<h1>Ennustus huomenna</h1>
+				<p>
+
+				</p>
+				<br><p>&copy; Antti.Codes 2020</p>
 			</div>
 
 			<div class="sidebyside">
@@ -34,14 +43,16 @@
 				<p id="wind"></p>
 				<h1>&nbsp;</h1>
 				<p id="other"></p>
+				<h1>&nbsp;</h1>
+				<p id="forecast1"></p>
+				<h1>&nbsp;</h1>
+				<p id="forecast2"></p>
 			</div>
 
 			<div class="canvascontainer">
 				<canvas width="500" height="500" id="direction"></canvas>
 			</div>
 		</div>
-
-		<p class="cr">&copy; Antti.Codes 2020</p>
 
 		<script>
 
@@ -86,6 +97,9 @@
 					absoluteHumidity,
 					feelsLikeTemp
 				} = data;
+
+				let forecast = await fetch('/api/forecast');
+				forecast = await forecast.json();
 
 				document.getElementById('wind').innerHTML =
 				`${windSpeedNowText} (${windSpeedNow} m/s)
