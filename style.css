@@ -7,19 +7,15 @@ p {
 }
 body {
     overflow-x: hidden;
-    overflow-y: scroll;
     background-color: lightblue;
 }
 
 .wrapper {
     width: 100%;
-    height: 46vw;
-    margin: 1vw;
-    padding: 5px;
+    margin: 2vw;
 }
   
 .sidebyside {
-    height: 100%;
     overflow: auto;
     overflow-wrap: break-word;
     width: 25%;
@@ -27,7 +23,6 @@ body {
 }
 
 .canvascontainer {
-    height: 100%;
     overflow: auto;
     overflow-wrap: break-word;
     width: 40%;
