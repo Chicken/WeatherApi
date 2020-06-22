@@ -29,13 +29,13 @@
 				</p>
 				<h1>Ennustus tänään</h1>
 				<p>
-
+					Auringon nousu:<br>
+					Auringon lasku:<br>
+					Lämpötila:<br>
+					UV indeksi:<br>
+					Tuulen nopeus:<br>
+					Kuvailu:<br>
 				</p>
-				<h1>Ennustus huomenna</h1>
-				<p>
-
-				</p>
-				<br><p>&copy; Antti.Codes 2020</p>
 			</div>
 
 			<div class="sidebyside">
@@ -44,15 +44,25 @@
 				<h1>&nbsp;</h1>
 				<p id="other"></p>
 				<h1>&nbsp;</h1>
-				<p id="forecast1"></p>
-				<h1>&nbsp;</h1>
-				<p id="forecast2"></p>
+				<p id="today"></p>
 			</div>
 
 			<div class="canvascontainer">
 				<canvas width="500" height="500" id="direction"></canvas>
+				<img class="bigicon "id="icon" width="200" height="200">
 			</div>
 		</div>
+
+		<h1 class="indepent">Viikon ennuste</h1>
+		<div class="indepent">
+			<ul id="row1">
+				
+			</ul>
+			<ul id="row2">
+			</ul>
+		</div>
+
+		<p class="indepent">&copy; Antti.Codes 2020</p>
 
 		<script>
 
@@ -70,6 +80,16 @@
 			    await ctx.rotate(degrees*Math.PI/180);
 			    await ctx.drawImage(nuoli,-nuoli.width/2,-nuoli.width/2);
 			    await ctx.restore();
+			}
+
+			function formatTime(time) {
+				let time2 = new Date(time+(1000*60*60*3))
+				return `${time2.getHours().toString().padStart(2,"0")}:${time2.getMinutes().toString().padStart(2,"0")}`
+			}
+
+			function formatDate(time) {
+				let time2 = new Date(time+(1000*60*60*3))
+				return `${["su","ma","ti","ke","to","pe","la"][time2.getDay()]} ${time2.getDate()}.${time2.getMonth()+1}`
 			}
 
 			async function updateData() {
@@ -119,6 +139,43 @@
 				${absoluteHumidity} g/m³
 				${feelsLikeTemp}&#176;C`
 				.split('\n').join('<br>')
+
+				document.getElementById('today').innerHTML =
+				`${formatTime(forecast.today.sunrise*1000)}
+				${formatTime(forecast.today.sunset*1000)}
+				${forecast.today.temp.max.toFixed(1)} &#176;C  / ${forecast.today.temp.min.toFixed(1)} &#176;C (max/min)
+				${forecast.today.uv}
+				${forecast.today.windspeed} m/s
+				${forecast.today.summary.replace(/^./, v=>v.toUpperCase())}.`
+				.split('\n').join('<br>')
+
+				document.getElementById('icon').src=`https://openweathermap.org/img/wn/${forecast.today.icon}@4x.png`
+
+				document.getElementById('row1').innerHTML = ""
+				document.getElementById('row2').innerHTML = ""
+				let i = 0
+				forecast.week.forEach(d=>{
+					i++;
+					let target
+					if(i>4) {
+						target = document.getElementById('row2')
+					} else {
+						target = document.getElementById('row1')
+					}
+					let el = document.createElement("li")
+					el.setAttribute('class', 'day');
+					el.innerHTML =
+					`
+					<div class="datecontainer">
+						<p class="date">${formatDate(d.time*1000)}</p>
+					</div>
+					<img class="smallicon" src="https://openweathermap.org/img/wn/${d.icon}@2x.png">
+					<p>Ylin: ${d.temp.max.toFixed(1)} &#176;C</p>
+					<p>Alin: ${d.temp.min.toFixed(1)} &#176;C</p>
+					<p>${d.windspeed.toFixed(1)} m/s</p>
+					`
+					target.appendChild(el);
+				})
 
 				draw(windDirAvg)
 			}

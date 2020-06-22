@@ -91,7 +91,8 @@ app.get('/api', (req,res)=>{
     GET /api/raw - raw wind data <br>
     GET /api/parsed - parsed wind data <br>
     GET /api/weather - all the weather info <br>
-    GET /api/forecast - latest forecast fetched from openweathermap <br>
+    GET /api/forecast - parsed forecast <br>
+    GET /api/forecast/all - latest forecast fetched from openweathermap <br>
     GET /api/gen/compass - image of wind dir compass, requires authentication<br>
     <br>
     &copy; Antti.Codes 2020`
@@ -114,6 +115,7 @@ app.get('/api/forecast', (req,res)=>{
     },
     week: latestForecast.daily.map(v=>{
       return {
+        time: v.dt,
         temp: {
           max: v.temp.max,
           min: v.temp.min
