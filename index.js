@@ -127,8 +127,6 @@ app.get('/api/forecast', (req,res)=>{
   })
 })
 
-
-
 //forecast but raw 3rd party api response
 app.get('/api/forecast/all', (req,res)=>{
   if(LOGGING_LEVEL>2) console.log(formatDate(new Date())+'API: all forecasts fetched');
