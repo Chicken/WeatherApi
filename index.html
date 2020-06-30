@@ -83,7 +83,7 @@
 			}
 
 			function formatTime(time) {
-				let time2 = new Date(time+(1000*60*60*3))
+				let time2 = new Date(time/*+(1000*60*60*3)*/)
 				return `${time2.getHours().toString().padStart(2,"0")}:${time2.getMinutes().toString().padStart(2,"0")}`
 			}
 
