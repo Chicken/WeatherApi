@@ -88,7 +88,7 @@
 			}
 
 			function formatDate(time) {
-				let time2 = new Date(time+(1000*60*60*3))
+				let time2 = new Date(time/*+(1000*60*60*3)*/)
 				return `${["su","ma","ti","ke","to","pe","la"][time2.getDay()]} ${time2.getDate()}.${time2.getMonth()+1}`
 			}
 
