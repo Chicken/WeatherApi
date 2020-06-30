@@ -149,14 +149,14 @@ app.get('/api/weather', (req,res)=>{
     windSpeedAvgText: getSpeedText(arrAvg(values.map(v=>v.speed))),
     windDirAvg: Math.round(getAverage(values.map(v=>v.direction)).toFixed(1)),
     windDirAvgText: getDirectionText(getAverage(values.map(v=>v.direction))),
-		temperature: latestTemp.temp,
-		dailyTempAvg: yesterdayAverage ? parseFloat(yesterdayAverage.toFixed(1)) : undefined,
-		humidity: latestTemp.hum,
-		pressure: latestPressure.pressure,
-		lightness: Math.round(latestLight.light),
-		dewPoint: parseFloat(dewPoint(latestTemp.temp, latestTemp.hum).toFixed(1)),
-		absoluteHumidity: parseFloat(absoluteHumidity(latestTemp.temp, latestTemp.hum).toFixed(1)),
-		feelsLikeTemp: feelsLikeTemp(latestTemp.temp, values[values.length-1].speed)
+    temperature: latestTemp.temp,
+    dailyTempAvg: yesterdayAverage ? parseFloat(yesterdayAverage.toFixed(1)) : undefined,
+    humidity: latestTemp.hum,
+    pressure: latestPressure.pressure,
+    lightness: Math.round(latestLight.light),
+    dewPoint: parseFloat(dewPoint(latestTemp.temp, latestTemp.hum).toFixed(1)),
+    absoluteHumidity: parseFloat(absoluteHumidity(latestTemp.temp, latestTemp.hum).toFixed(1)),
+    feelsLikeTemp: feelsLikeTemp(latestTemp.temp, values[values.length-1].speed)
   })
 })
 
