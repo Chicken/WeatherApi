@@ -1,0 +1,94 @@
+html, body {
+    font-size: 0.7vw;
+    margin: 0px;
+    padding: 0px;
+    text-align: center;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-image: url("bg.webp");
+    background-size: 100vw;
+    color: white;
+}
+
+.windrose {
+    margin-top: 2vh;
+    text-align: center;
+}
+
+#rose {
+    margin-top: 25vh;
+    float: right;
+    width: 55%;
+}
+
+a {
+    color: white;
+    text-decoration: none;
+}
+
+p {
+    margin: 0;
+}
+
+.copyright {
+    bottom: 1vh;
+    position: absolute;
+    font-size: 1.3em;
+}
+
+.data {
+    font-size: 3em;
+}
+
+.icon {
+    text-align: center;
+}
+
+#icon {
+    float: left;
+    margin-top: 2vh;
+    background-color: rgba(192,192,192,0.7);
+    border: 10px solid rgba(192,192,192,0.7);
+    border-radius: 1024px;
+    width: 40%;
+}
+
+.large {
+    text-align: center;
+    font-weight: bold;
+    font-size: 8em;
+}
+
+.sub {
+    border: 0.5vw solid rgba(192,192,192,0.5);
+    text-align: center;
+    padding: 0.5em;
+    margin: 0;
+    margin-top: 3.5%;
+    background-color: rgba(192,192,192,0.4);
+    width: 24vw;
+    height: 20%;
+}
+
+.section {
+    margin: 0px;
+    padding: 0px;
+    height: 100%;
+}
+
+.left {
+    margin-left: 1vw;
+    margin-right: 4vw;
+    float: left;  
+    width: 25vw; 
+} 
+
+.middle {
+    float: left;
+    width: 40vw; 
+} 
+
+.right {
+    margin-right: 1vw;
+    float: right; 
+    width: 25vw; 
+} 

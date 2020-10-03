@@ -98,17 +98,8 @@ app.get('/',(req, res)=>{
   res.sendFile(__dirname + '/index.html')
 })
 
-//css
-app.get('/style.css',(req, res)=>{
-  if(LOGGING_LEVEL>2) console.log(formatDate(new Date())+'WEBPAGE: css loaded');
-  res.sendFile(__dirname + '/style.css')
-})
-
-//public media files
-app.get('/media/:file', (req,res)=>{
-  if(LOGGING_LEVEL>2) console.log(formatDate(new Date())+'WEBPAGE: media file ' + req.params.file + ' loaded');
-  res.sendFile(__dirname + '/media/' + req.params.file)
-})
+//static files
+app.use("/media", express.static(__dirname + '/media'));
 
 //api doc
 app.get('/api', (req,res)=>{
