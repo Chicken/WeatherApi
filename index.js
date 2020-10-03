@@ -14,6 +14,7 @@ rl.on("line", (input)=>{
 })
 
 //dependencies and variables
+const mariadb = require('mariadb');
 const bent = require("bent");
 const SerialPort = require('serialport');
 const SHT31 = require('raspi-node-sht31');
@@ -28,6 +29,7 @@ const app = express();
 require("dotenv").config();
 
 let values = [],
+    ldata,
     raw = [],
     todayTemps = [],
     yesterdayAverage = undefined,
@@ -37,6 +39,33 @@ let values = [],
     latestForecast = {};
 
 const LOGGING_LEVEL = 2; //0=nothing, 1=important, 2=website, 3=all the useless shit
+
+//db
+const pool = mariadb.createPool({
+  database: "weather",
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PW,
+  connectionLimit: 5
+});
+
+async function saveToDb() {
+   let conn = await pool.getConnection();
+    try {
+        await conn.query("INSERT INTO weather (time, windSpeedNow, windDirNow, windGust, windSpeedAvg, windDirAvg, temperature, dailyTempAvg, humidity, pressure, lightness, dewPoint, absoluteHumidity, feelsLikeTemp) " +
+                         "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                        [Date.now(), ldata.windSpeedNow, ldata.windDirNow, ldata.windGust, ldata.windSpeedAvg, ldata.windDirAvg, ldata.temperature, ldata.dailyTempAvg || null,
+                        ldata.humidity, ldata.pressure, ldata.lightness, ldata.dewPoint, ldata.absoluteHumidity, ldata.feelsLikeTemp])
+    } catch (e) {
+        console.error(formatDate(new Date())+"DB: "+e);
+    } finally {
+        if(LOGGING_LEVEL>0) console.log(formatDate(new Date())+"DB: Saved weather to database.");
+        conn.release();
+    }
+}
+
+setTimeout(saveToDb, 1000*30)
+setInterval(saveToDb, 1000*60*10)
 
 //dailyaverage timer
 let currentTime = new Date()
@@ -93,7 +122,6 @@ app.get('/api', (req,res)=>{
     GET /api/weather - all the weather info <br>
     GET /api/forecast - parsed forecast <br>
     GET /api/forecast/all - latest forecast fetched from openweathermap <br>
-    GET /api/gen/compass - image of wind dir compass, requires authentication<br>
     <br>
     &copy; Antti.Codes 2020`
   )
@@ -138,26 +166,7 @@ app.get('/api/forecast/all', (req,res)=>{
 //all the weather data
 app.get('/api/weather', (req,res)=>{
   if(LOGGING_LEVEL>2) console.log(formatDate(new Date())+'API: weather data asked');
-  res.send({
-    windSpeedNow: values[values.length-1].speed,
-    windSpeedNowText: getSpeedText(values[values.length-1].speed),
-    windDirNow: values[values.length-1].direction,
-    windDirNowText: getDirectionText(values[values.length-1].direction),
-    windGust: Math.max(...values.map(v=>v.speed)),
-    windGustText: getSpeedText(Math.max(...values.map(v=>v.speed))),
-    windSpeedAvg: parseFloat(arrAvg(values.map(v=>v.speed)).toFixed(1)),
-    windSpeedAvgText: getSpeedText(arrAvg(values.map(v=>v.speed))),
-    windDirAvg: Math.round(getAverage(values.map(v=>v.direction)).toFixed(1)),
-    windDirAvgText: getDirectionText(getAverage(values.map(v=>v.direction))),
-    temperature: latestTemp.temp,
-    dailyTempAvg: yesterdayAverage ? parseFloat(yesterdayAverage.toFixed(1)) : undefined,
-    humidity: latestTemp.hum,
-    pressure: latestPressure.pressure,
-    lightness: Math.round(latestLight.light),
-    dewPoint: parseFloat(dewPoint(latestTemp.temp, latestTemp.hum).toFixed(1)),
-    absoluteHumidity: parseFloat(absoluteHumidity(latestTemp.temp, latestTemp.hum).toFixed(1)),
-    feelsLikeTemp: feelsLikeTemp(latestTemp.temp, values[values.length-1].speed)
-  })
+  res.send(ldata)
 })
 
 //raw wind sensor data
@@ -234,6 +243,26 @@ parser.on('data', async data =>{
   latestTemp = await readTemp();
   latestPressure = await readPressure();
   latestLight = await readLight();
+  ldata = {
+    windSpeedNow: values[values.length-1].speed,
+    windSpeedNowText: getSpeedText(values[values.length-1].speed),
+    windDirNow: values[values.length-1].direction,
+    windDirNowText: getDirectionText(values[values.length-1].direction),
+    windGust: Math.max(...values.map(v=>v.speed)),
+    windGustText: getSpeedText(Math.max(...values.map(v=>v.speed))),
+    windSpeedAvg: parseFloat(arrAvg(values.map(v=>v.speed)).toFixed(1)),
+    windSpeedAvgText: getSpeedText(arrAvg(values.map(v=>v.speed))),
+    windDirAvg: Math.round(getAverage(values.map(v=>v.direction)).toFixed(1)),
+    windDirAvgText: getDirectionText(getAverage(values.map(v=>v.direction))),
+    temperature: latestTemp.temp,
+    dailyTempAvg: yesterdayAverage ? parseFloat(yesterdayAverage.toFixed(1)) : undefined,
+    humidity: latestTemp.hum,
+    pressure: latestPressure.pressure,
+    lightness: Math.round(latestLight.light),
+    dewPoint: parseFloat(dewPoint(latestTemp.temp, latestTemp.hum).toFixed(1)),
+    absoluteHumidity: parseFloat(absoluteHumidity(latestTemp.temp, latestTemp.hum).toFixed(1)),
+    feelsLikeTemp: feelsLikeTemp(latestTemp.temp, values[values.length-1].speed)
+  }
 });
 
 function getDirectionText(dir) {
@@ -299,7 +328,7 @@ function radToDeg(radians){
 function getAverage(angles) {
 	let sinSum = 0;
 	let cosSum = 0;
-	
+
 	for(angle of angles){
 		let r = degToRad(angle)
 		sinSum += Math.sin(r)
@@ -317,7 +346,7 @@ function getAverage(angles) {
 		average = arc + 180;
 	} else if(s<0&&c>0) {
 		average = arc + 360;
-	} 
+	}
 	if(average==360) return 0;
 	return average;
 }
@@ -333,7 +362,7 @@ function absoluteHumidity(temp,hum) {
 
 function feelsLikeTemp(T,V) {
 	if(T>10||V<1.5) return T;
-	return 13.12+0.6215*T-13.956*Math.pow(V,0.16)+0.4867*T*Math.pow(V,0.16)
+	return (13.12+0.6215*T-13.956*Math.pow(V,0.16)+0.4867*T*Math.pow(V,0.16)).toFixed(1);
 }
 
 function formatDate(date) {
