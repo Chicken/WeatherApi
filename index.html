@@ -1,191 +1,265 @@
 <html>
-<head>
-	<title>Weather</title>
-	<link rel="stylesheet" type="text/css" href="style.css">
-</head>
-	<body>
+	<head>
+		<meta charset="UTF-8">
+		<title>WeatherScreen</title>
+	</head>
+	<body onload="onLoad()">
+
+		<div class="section left">
+			<div class="sub">
+				<p class="data" id="temp">
+
+				</p>
+			</div>
+			<div class="sub">
+				<p class="data" id="wind">
+
+				</p>
+			</div>
+			<div class="sub">
+				<p class="data" id="humidity">
+
+				</p>
+			</div>
+			<div class="sub">
+				<p class="data" id="other">
+
+				</p>
+			</div>
+		</div>
 		
-		<div class="wrapper">
+		<div class="section middle">
+			<div class="large" id="clock">
 
-			<div class="sidebyside">
-				<h1>Tuuli (10min)</h1>
-				<p>
-					Nopeus (nyt):<br>
-					Suunta (nyt):<br>
-					Puuska nopeus:<br>
-					Nopeuden keskiarvo:<br>
-					Suunnan keskiarvo:<br>
-				</p>
-				<h1>Muut</h1>
-				<p>
-					Lämpötila:<br>
-					Keskilämpötila:<br>
-					Kosteus:<br>
-					Ilmanpaine:<br>
-					Valoisuus:<br>
-					Kastepiste:<br>
-					Absoluuttinen kosteus:<br>
-					Tuntuu kuin:<br>
-				</p>
-				<h1>Ennustus tänään</h1>
-				<p>
-					Auringon nousu:<br>
-					Auringon lasku:<br>
-					Lämpötila:<br>
-					UV indeksi:<br>
-					Tuulen nopeus:<br>
-					Kuvailu:<br>
+			</div>
+			<div class="large" id="templarge">
+
+			</div>
+			<div class="icon">
+				<img id="icon">
+			</div>
+			<div class="windrose">
+                <canvas width="1000" height="1000" id="rose"></canvas>
+            </div>
+            <p class="copyright">
+                &copy; Antti.Codes 2020<br>
+                <a href="https://github.com/Chicken/WeatherApi" target="_blank">Source on github</a>
+            </p>
+		</div>
+
+		<div class="section right">
+			<div class="sub">
+				<p class="data" id="forecast">
+
 				</p>
 			</div>
+			<div class="sub">
+				<p class="data" id="sun">
 
-			<div class="sidebyside">
-				<h1>&nbsp;</h1>
-				<p id="wind"></p>
-				<h1>&nbsp;</h1>
-				<p id="other"></p>
-				<h1>&nbsp;</h1>
-				<p id="today"></p>
+				</p>
 			</div>
+			<div class="sub">
+				<p class="data" id="uv">
 
-			<div class="canvascontainer">
-				<canvas width="500" height="500" id="direction"></canvas>
-				<img class="bigicon "id="icon" width="200" height="200">
+				</p>
+			</div>
+			<div class="sub">
+				<p class="data" id="windf">
+
+				</p>
 			</div>
 		</div>
 
-		<h1 class="indepent">Viikon ennuste</h1>
-		<div class="indepent">
-			<ul id="row1">
-				
-			</ul>
-			<ul id="row2">
-			</ul>
-		</div>
+		<style>
+			html, body {
+                font-size: 0.7vw;
+				margin: 0px;
+				padding: 0px;
+				text-align: center;
+				font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+				background-image: url("media/bg.webp");
+				background-size: 100vw;
+				color: white;
+			}
 
-		<p class="indepent">
-			&copy; Antti.Codes 2020<br>
-			<a href="https://github.com/Chicken-E/WeatherApi" target="_blank">Source on github</a>
-		</p>
+			.windrose {
+				margin-top: 2vh;
+				text-align: center;
+			}
 
+			#rose {
+                margin-top: 25vh;
+                float: right;
+				width: 55%;
+			}
+
+			a {
+				color: white;
+				text-decoration: none;
+			}
+
+			p {
+				margin: 0;
+			}
+
+            .copyright {
+                bottom: 1vh;
+                position: absolute;
+                font-size: 1.3em;
+            }
+
+			.data {
+				font-size: 3em;
+			}
+
+			.icon {
+				text-align: center;
+			}
+
+			#icon {
+                float: left;
+				margin-top: 2vh;
+				background-color: rgba(192,192,192,0.7);
+				border: 10px solid rgba(192,192,192,0.7);
+				border-radius: 1024px;
+				width: 40%;
+			}
+
+			.large {
+				text-align: center;
+				font-weight: bold;
+				font-size: 8em;
+			}
+
+			.sub {
+				border: 0.5vw solid rgba(192,192,192,0.5);
+				text-align: center;
+				padding: 0.5em;
+				margin: 0;
+				margin-top: 3.5%;
+				background-color: rgba(192,192,192,0.4);
+				width: 24vw;
+				height: 20%;
+			}
+
+			.section {
+				margin: 0px;
+				padding: 0px;
+				height: 100%;
+			}
+
+			.left {
+				margin-left: 1vw;
+				margin-right: 4vw;
+                float: left;  
+                width: 25vw; 
+            } 
+
+            .middle {
+				float: left;
+                width: 40vw; 
+            } 
+
+            .right {
+				margin-right: 1vw;
+                float: right; 
+                width: 25vw; 
+            } 
+		</style>
 		<script>
-
-			const canvas = document.getElementById('direction');
+            const canvas = document.getElementById('rose');
 			const ctx = canvas.getContext('2d');
-			const tausta = new Image();
-			tausta.src = './media/tausta.png';
-			const nuoli = new Image();
-			nuoli.src = './media/nuoli.png';
-
-			async function draw(degrees){
-				await ctx.drawImage(tausta, 0, 0)
+			const bg = new Image();
+			bg.src = './media/rose.bmp';
+			const arrow = new Image();
+            arrow.src = './media/arrow.png';
+            
+            async function draw(degrees){
+				await ctx.drawImage(bg, 0, 0, 1000, 1000)
 				await ctx.save();
 			    await ctx.translate(canvas.width/2,canvas.height/2);
 			    await ctx.rotate(degrees*Math.PI/180);
-			    await ctx.drawImage(nuoli,-nuoli.width/2,-nuoli.width/2);
+			    await ctx.drawImage(arrow,-arrow.width,-arrow.width, 1000, 1000);
 			    await ctx.restore();
 			}
 
 			function formatTime(time) {
-				let time2 = new Date(time/*+(1000*60*60*3)*/)
-				return `${time2.getHours().toString().padStart(2,"0")}:${time2.getMinutes().toString().padStart(2,"0")}`
+				let time2 = new Date(time);
+				return `${time2.getHours().toString().padStart(2,"0")}:${time2.getMinutes().toString().padStart(2,"0")}`;
 			}
-
-			function formatDate(time) {
-				let time2 = new Date(time/*+(1000*60*60*3)*/)
-				return `${["su","ma","ti","ke","to","pe","la"][time2.getDay()]} ${time2.getDate()}.${time2.getMonth()+1}`
-			}
-
-			async function updateData() {
 			
-				let data = await fetch('/api/weather');
+			async function update() {
+				let data = await fetch("https://weather.antti.codes/api/weather");
 				data = await data.json();
-			
-				let {
-					windSpeedNow,
-					windSpeedNowText,
-					windDirNow,
-					windDirNowText,
-					windGust,
-					windGustText,
-					windSpeedAvg,
-					windSpeedAvgText,
-					windDirAvg,
-					windDirAvgText,
-					temperature,
-					dailyTempAvg,
-					humidity,
-					pressure,
-					lightness,
-					dewPoint,
-					absoluteHumidity,
-					feelsLikeTemp
-				} = data;
 
-				let forecast = await fetch('/api/forecast');
+				document.getElementById("templarge").innerHTML = data.temperature.toFixed(1) + " &#176;C";
+
+				document.getElementById("temp").innerHTML =
+				`Temperature: ${data.temperature} &#176;C <br>
+				Feels Like Temp: ${data.feelsLikeTemp} &#176;C <br>
+				Yesterday Avg Temp: ${data.dailyTempAvg} &#176;C <br>
+				`;
+
+				document.getElementById("wind").innerHTML =
+				`Wind Speed Avg: ${data.windSpeedAvg} m/s <br>
+				Wind Dir Avg: ${data.windDirAvg} &#176; <br>
+				Wing Gust: ${data.windGust} m/s
+				`;
+
+				document.getElementById("humidity").innerHTML =
+				`Humidity: ${data.humidity} % <br>
+				Absolute Humidity: ${data.absoluteHumidity} g/m³ <br>
+				Dew Point ${data.dewPoint} &#176;C
+				`;
+
+				document.getElementById("other").innerHTML =
+				`Pressure: ${data.pressure} hPa <br>
+				Lightness: ${data.lightness} lx <br>
+				`;
+
+				let forecast = await fetch("https://weather.antti.codes/api/forecast");
 				forecast = await forecast.json();
 
-				document.getElementById('wind').innerHTML =
-				`${windSpeedNowText} (${windSpeedNow} m/s)
-				${windDirNowText} (${windDirNow} &#176;)
-				${windGustText} (${windGust} m/s)
-				${windSpeedAvgText} (${windSpeedAvg} m/s)
-				${windDirAvgText} (${windDirAvg} &#176;)`
-				.split('\n').join('<br>');
+				document.getElementById("forecast").innerHTML =
+				`Forecast temp: ${forecast.today.temp.day} <br>
+				Forecast summary: <br>
+				"${forecast.today.summary}"
+				`;
 			
-				document.getElementById('other').innerHTML =
-				`${temperature} &#176;C
-				${dailyTempAvg == undefined ? "Ei tarpeeksi dataa." : `${dailyTempAvg} &#176;C`}
-				${humidity} %
-				${pressure} hPa
-				${lightness} lx
-				${dewPoint} &#176;C
-				${absoluteHumidity} g/m³
-				${feelsLikeTemp}&#176;C`
-				.split('\n').join('<br>')
+				let dateRise = new Date(forecast.today.sunrise*1000);
+				let dateSet = new Date(forecast.today.sunset*1000);
+				let riseMin = dateRise.getMinutes() + dateRise.getHours()*60;
+				let setMin = dateSet.getMinutes() + dateSet.getHours()*60;
+				let diff = setMin - riseMin;
+				let hours = (diff-diff%60)/60;
+				let minutes = diff-hours*60;
 
-				document.getElementById('today').innerHTML =
-				`${formatTime(forecast.today.sunrise*1000)}
-				${formatTime(forecast.today.sunset*1000)}
-				${forecast.today.temp.max.toFixed(1)} &#176;C  / ${forecast.today.temp.min.toFixed(1)} &#176;C (max/min)
-				${forecast.today.uv}
-				${forecast.today.windspeed} m/s
-				${forecast.today.summary.replace(/^./, v=>v.toUpperCase())}.`
-				.split('\n').join('<br>')
+				document.getElementById("sun").innerHTML =
+				`Sunrise: ${formatTime(forecast.today.sunrise*1000)} <br>
+				Sunset: ${formatTime(forecast.today.sunset*1000)} <br>
+				Length of day: ${hours.toString().padStart(2,"0")}:${minutes.toString().padStart(2,"0")} 
+				`;
 
-				document.getElementById('icon').src=`https://openweathermap.org/img/wn/${forecast.today.icon}@4x.png`
+				document.getElementById("uv").innerHTML = `UV index: ${forecast.today.uv}`;
 
-				document.getElementById('row1').innerHTML = ""
-				document.getElementById('row2').innerHTML = ""
-				let i = 0
-				forecast.week.forEach(d=>{
-					i++;
-					let target
-					if(i>4) {
-						target = document.getElementById('row2')
-					} else {
-						target = document.getElementById('row1')
-					}
-					let el = document.createElement("li")
-					el.setAttribute('class', 'day');
-					el.innerHTML =
-					`
-					<div class="datecontainer">
-						<p class="date">${formatDate(d.time*1000)}</p>
-					</div>
-					<img class="smallicon" src="https://openweathermap.org/img/wn/${d.icon}@2x.png">
-					<p>Ylin: ${d.temp.max.toFixed(1)} &#176;C</p>
-					<p>Alin: ${d.temp.min.toFixed(1)} &#176;C</p>
-					<p>${d.windspeed.toFixed(1)} m/s</p>
-					`
-					target.appendChild(el);
-				})
+				document.getElementById("windf").innerHTML = `Wind speed: ${forecast.today.windspeed.toFixed(1)} m/s`;
 
-				draw(windDirAvg)
+                document.getElementById('icon').src=`https://openweathermap.org/img/wn/${forecast.today.icon}@4x.png`
+                
+                draw(data.windDirAvg);
 			}
 
-			updateData()
-			setInterval(updateData, 2000)
-		
+			function clock() {
+				let date = new Date();
+				document.getElementById("clock").innerHTML = `${date.getHours().toString().padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}:${date.getSeconds().toString().padStart(2, "0")}`
+			}
+
+			function onLoad() {
+                clock();
+                update();
+				setInterval(clock, 500)
+                setInterval(update, 2000);
+			}
 		</script>
-</body>
+	 </body>
 </html>
