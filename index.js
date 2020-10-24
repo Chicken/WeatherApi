@@ -100,7 +100,7 @@ let timeout = setTimeout(()=>{
 //forecast fetch loop
 async function fetchForecast() {
   if(LOGGING_LEVEL>2) console.log(formatDate(new Date())+'THIRD PARTY: forecast data fetched')
-  latestForecast = await bent(200, "json")(`https://api.openweathermap.org/data/2.5/onecall?lat=65.012615&lon=25.471453&units=metric&lang=fi&exclude=minutely&appid=${process.env.key}`)
+  latestForecast = await bent(200, "json")(`https://api.openweathermap.org/data/2.5/onecall?lat=65.012615&lon=25.471453&units=metric&lang=en&exclude=minutely&appid=${process.env.key}`)
 }
 fetchForecast()
 let interval2 = setInterval(fetchForecast,1000*60*10)
