@@ -20,7 +20,7 @@ function formatTime(time) {
 }
 
 async function update() {
-    let data = await fetch("https://weather.antti.codes/api/weather");
+    let data = await fetch("/api/weather");
     data = await data.json();
 
     document.getElementById("templarge").innerHTML = data.temperature.toFixed(1) + " &#176;C";
@@ -48,11 +48,11 @@ async function update() {
     Lightness: ${data.lightness} lx <br>
     `;
 
-    let forecast = await fetch("https://weather.antti.codes/api/forecast");
+    let forecast = await fetch("/api/forecast");
     forecast = await forecast.json();
 
     document.getElementById("forecast").innerHTML =
-    `Forecast temp: ${forecast.today.temp.day} <br>
+    `Forecast temp: ${forecast.today.temp.day} &#176;C<br>
     Forecast summary: <br>
     "${forecast.today.summary}"
     `;
@@ -71,11 +71,19 @@ async function update() {
     Length of day: ${hours.toString().padStart(2,"0")}:${minutes.toString().padStart(2,"0")} 
     `;
 
-    document.getElementById("uv").innerHTML = `UV index: ${forecast.today.uv}`;
+    document.getElementById("misc").innerHTML =
+    `UV index: ${forecast.today.uv} <br>
+    Wind speed: ${forecast.today.windspeed.toFixed(1)} m/s`;
 
-    document.getElementById("windf").innerHTML = `Wind speed: ${forecast.today.windspeed.toFixed(1)} m/s`;
+    document.getElementById("tomorrow").innerHTML = 
+    `Tomorrow: <br>
+    Temperature max: ${forecast.week[1].temp.max.toFixed(1)} &#176;C<br>
+    Temperature min: ${forecast.week[1].temp.min.toFixed(1)} &#176;C<br>
+    Wind speed: ${forecast.week[1].windspeed.toFixed(1)} m/s`;
 
-    document.getElementById('icon').src=`https://openweathermap.org/img/wn/${forecast.today.icon}@4x.png`
+    let icon = document.getElementById('icon');
+    let src = `https://openweathermap.org/img/wn/${forecast.today.icon}@4x.png`;
+    if(icon.src != src) icon.src = src;
     
     draw(data.windDirAvg);
 }

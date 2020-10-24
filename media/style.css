@@ -1,11 +1,11 @@
 html, body {
-    font-size: 0.7vw;
+    font-size: 0.65vw;
     margin: 0px;
     padding: 0px;
     text-align: center;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-image: url("bg.webp");
-    background-size: 100vw;
+    background-size: cover;
     color: white;
 }
 
