@@ -49,6 +49,19 @@ const pool = mariadb.createPool({
   connectionLimit: 5
 });
 
+(async()=>{
+    let conn = await pool.getConnection();
+    try {
+      let res = await conn.query("SELECT dailyTempAvg FROM weather ORDER BY time desc LIMIT 1")
+      yesterdayAverage = res[0].dailyTempAvg;
+    } catch (e) {
+        console.error(formatDate(new Date())+"DB: "+e);
+    } finally {
+        if(LOGGING_LEVEL>0) console.log(formatDate(new Date())+"DB: Fetched latest dailyTempAvg from database.");
+        conn.release();
+    }
+})()
+
 async function saveToDb() {
    let conn = await pool.getConnection();
     try {
