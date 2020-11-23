@@ -111,6 +111,12 @@ app.get('/',(req, res)=>{
   res.sendFile(__dirname + '/index.html')
 })
 
+//worker
+app.get('/worker.js',(req, res)=>{
+  if(LOGGING_LEVEL>2) console.log(formatDate(new Date())+'WEBPAGE: worker loaded');
+  res.sendFile(__dirname + '/worker.js')
+})
+
 //static files
 app.use("/media", express.static(__dirname + '/media'));
 

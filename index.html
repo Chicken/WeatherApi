@@ -1,11 +1,19 @@
-<html>
+<!-- <!DOCTYPE html> -->
+<html lang="en">
 	<head>
 		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="description" content="Antti.Codes Weather Station Dislay">
+		<meta name="theme-color" content="#FDF648"></meta>
+		<link rel="apple-touch-icon" href="./media/icons/icon_192.png">
 		<title>WeatherScreen</title>
 		<link rel="stylesheet" href="./media/style.css">
+		<link rel="icon" href="./media/icons/icon_192.png" type="image/png" />
+		<link rel="manifest" href="./media/manifest.webmanifest">
 		<script src="./media/script.js" defer></script>
 	</head>
 	<body>
+		<a class="skip-link" href="#main">Skip to main</a>
 		<div class="section left">
 			<div class="sub">
 				<p class="data" id="temp">
@@ -29,25 +37,27 @@
 			</div>
 		</div>
 		
-		<div class="section middle">
-			<div class="large" id="clock">
+		<main class="section middle" id="main">
+			<header>
+				<div class="large" id="clock">
 
-			</div>
+				</div>
+			</header>
 			<div class="large" id="templarge">
 
 			</div>
 			<div class="icon">
-				<img id="icon">
+				<img alt="" id="icon">
 			</div>
 			<div class="windrose">
 				<canvas width="1000" height="1000" id="rose"></canvas> 
 			</div> 
             <p class="copyright">
                 &copy; Antti.Codes 2020<br>
-                <a href="https://github.com/Chicken/WeatherApi" target="_blank">Source on github</a><br>
-				<a href="https://grafana.antti.codes/d/yCiX9gKMk/weather" target="_blank">Long term data exploration</a>
+                <a rel="noreferrer" href="https://github.com/Chicken/WeatherApi" target="_blank">Source on github</a><br>
+				<a rel="noreferrer" href="https://grafana.antti.codes/d/yCiX9gKMk/weather" target="_blank">Long term data exploration</a>
             </p>
-		</div>
+		</main>
 
 		<div class="section right">
 			<div class="sub">

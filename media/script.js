@@ -1,9 +1,9 @@
 const canvas = document.getElementById('rose');
 const ctx = canvas.getContext('2d');
 const bg = new Image();
-bg.src = './media/rose.bmp';
+bg.src = './media/rose.webp';
 const arrow = new Image();
-arrow.src = './media/arrow.png';
+arrow.src = './media/arrow.webp';
 
 async function draw(degrees){
     await ctx.drawImage(bg, 0, 0, 1000, 1000)
@@ -84,6 +84,7 @@ async function update() {
     let icon = document.getElementById('icon');
     let src = `https://openweathermap.org/img/wn/${forecast.today.icon}@4x.png`;
     if(icon.src != src) icon.src = src;
+    if(icon.alt != forecast.today.summary) icon.alt = forecast.today.summary;
     
     draw(data.windDirAvg);
 }
@@ -98,3 +99,6 @@ clock();
 update();
 setInterval(clock, 500)
 setInterval(update, 2000);
+
+navigator.serviceWorker.register("worker.js", { scope: "/" })
+.then(() => console.log("Service Worker Registered"));
