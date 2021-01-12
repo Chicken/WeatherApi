@@ -234,14 +234,15 @@ async function readLight() {
 }
 
 parser.on("data", async data => {
-    raw.push(data);
-    log("SENSOR", 2, "New wind data " + data);
-    if(raw.length >= 600) raw.shift();
     data = data.split(",");
     if(data[5].startsWith("V")) {
         log("SENSOR", 0, "Invalid wind data " + data, true);
-        data = raw[raw.length - 1];
+        data = raw[raw.length - 1].split(",");
+    } else {
+        log("SENSOR", 2, "New wind data " + data);
     }
+    if(raw.length >= 600) raw.shift();
+    raw.push(data.join(","));
     data = {
         direction: parseInt(data[1]),
         speed: parseFloat(data[3])
