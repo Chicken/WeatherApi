@@ -11,6 +11,7 @@ const port = new SerialPort("/dev/serial0", { baudRate: 9600 });
 const parser = port.pipe(new Readline({ delimiter: "\n" }));
 const express = require("express");
 const app = express();
+const cors = require("cors");
 require("dotenv").config();
 
 let values = [],
@@ -103,6 +104,11 @@ async function fetchForecast() {
 }
 fetchForecast();
 setInterval(fetchForecast, 1000 * 60 * 10);
+
+//cors
+app.use(cors({
+    origin: "*"
+}));
 
 //main page
 app.get("/",(_req, res)=>{
