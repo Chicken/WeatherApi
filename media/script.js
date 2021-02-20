@@ -49,7 +49,7 @@ async function update() {
     document.getElementById("other").innerHTML =
     `Pressure: ${data.pressure} hPa <br>
     Lightness: ${data.lightness} lx <br>
-    Radiation: ${data.radiation} &micro;Sv/h <br>
+    Radiation: ${data.radiationAvg} &micro;Sv/h <br>
     `;
 
     let forecast = await fetch("/api/forecast");

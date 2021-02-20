@@ -1,3 +1,18 @@
+/*
+TODO LIST
+- modular, this file is getting way too big
+- get rid of the sht31 and bmp180 libs, would be cleaner to just manually read all from i2c
+- clean up some code and api stuff
+
+i2C ADDRESS CHEATSHEET
+device  target    address
+sht31   temp&hum  44
+bmp180  pressure  77
+bh1750  light     5c
+        radiation 08
+        future    48
+*/
+
 // dependencies and variables
 const mariadb = require("mariadb");
 const bent = require("bent");
@@ -16,6 +31,7 @@ require("dotenv").config();
 
 // global variables to save stuff
 let values = [],
+    radiationValues = [],
     ldata,
     raw = [],
     todayTemps = [],
@@ -77,10 +93,10 @@ const pool = mariadb.createPool({
 async function saveToDb() {
     let conn = await pool.getConnection();
     try {
-        await conn.query("INSERT INTO weather (time, windSpeedNow, windDirNow, windGust, windSpeedAvg, windDirAvg, temperature, dailyTempAvg, humidity, pressure, lightness, dewPoint, absoluteHumidity, feelsLikeTemp, radiation) " +
-                         "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+        await conn.query("INSERT INTO weather (time, windSpeedNow, windDirNow, windGust, windSpeedAvg, windDirAvg, temperature, dailyTempAvg, humidity, pressure, lightness, dewPoint, absoluteHumidity, feelsLikeTemp, radiationNow, radiationAvg) " +
+                         "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
         [Date.now(), ldata.windSpeedNow, ldata.windDirNow, ldata.windGust, ldata.windSpeedAvg, ldata.windDirAvg, ldata.temperature, ldata.dailyTempAvg || null,
-            ldata.humidity, ldata.pressure, ldata.lightness, ldata.dewPoint, ldata.absoluteHumidity, ldata.feelsLikeTemp, ldata.radiation]);
+            ldata.humidity, ldata.pressure, ldata.lightness, ldata.dewPoint, ldata.absoluteHumidity, ldata.feelsLikeTemp, ldata.radiationNow, ldata.radiationAvg]);
     } catch (e) {
         log("DB", 0, e, true);
     } finally {
@@ -331,6 +347,10 @@ parser.on("data", async data => {
         readRadiation()
     ]);
 
+    // for 10min radiation average
+    if(radiationValues.length >= 600) radiationValues.shift();
+    radiationValues.push(latestRadiation);
+
     // windspeed average
     let wsAvg = parseFloat(arrAvg(values.map(v => v.speed)).toFixed(1));
     // yeah we do this giant object in the fly too
@@ -351,7 +371,8 @@ parser.on("data", async data => {
         humidity: latestTemp.hum,
         pressure: latestPressure,
         lightness: Math.round(latestLight),
-        radiation: latestRadiation,
+        radiationNow: latestRadiation,
+        radiationAvg: parseFloat(arrAvg(radiationValues).toFixed(2)),
         dewPoint: parseFloat(dewPoint(latestTemp.temp, latestTemp.hum).toFixed(1)),
         absoluteHumidity: parseFloat(absoluteHumidity(latestTemp.temp, latestTemp.hum).toFixed(1)),
         feelsLikeTemp: feelsLikeTemp(latestTemp.temp, wsAvg)
