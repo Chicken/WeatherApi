@@ -50,6 +50,7 @@ async function update() {
     `Pressure: ${data.pressure} hPa <br>
     Lightness: ${data.lightness} lx <br>
     Radiation: ${data.radiationAvg} &micro;Sv/h <br>
+    Solar Irradiance: ${data.solarIrradiance} W/m²
     `;
 
     let forecast = await fetch("/api/forecast");

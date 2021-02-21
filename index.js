@@ -4,13 +4,13 @@ TODO LIST
 - get rid of the sht31 and bmp180 libs, would be cleaner to just manually read all from i2c
 - clean up some code and api stuff
 
-i2C ADDRESS CHEATSHEET
-device  target    address
-sht31   temp&hum  44
-bmp180  pressure  77
-bh1750  light     5c
-        radiation 08
-        future    48
+I2C ADDRESS CHEATSHEET
+device  address cmd measuring 
+sht31   44          temp&hum
+bmp180  77          pressure
+bh1750  5c      20  light
+        08      00  radiation
+pcf8591 48      43  solar irradiance
 */
 
 // dependencies and variables
@@ -40,7 +40,11 @@ let values = [],
     latestPressure = 0,
     latestLight = 0,
     latestRadiation = 0,
-    latestForecast = {};
+    latestForecast = {},
+    ANIN0,
+    ANIN1,
+    ANIN2,
+    latestSolarIrradiance;
 
 // 0 = nothing, 1 = important, 2 = website, 3 = everything
 const LOGGING_LEVEL = 2;
@@ -93,10 +97,10 @@ const pool = mariadb.createPool({
 async function saveToDb() {
     let conn = await pool.getConnection();
     try {
-        await conn.query("INSERT INTO weather (time, windSpeedNow, windDirNow, windGust, windSpeedAvg, windDirAvg, temperature, dailyTempAvg, humidity, pressure, lightness, dewPoint, absoluteHumidity, feelsLikeTemp, radiationNow, radiationAvg) " +
-                         "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+        await conn.query("INSERT INTO weather (time, windSpeedNow, windDirNow, windGust, windSpeedAvg, windDirAvg, temperature, dailyTempAvg, humidity, pressure, lightness, dewPoint, absoluteHumidity, feelsLikeTemp, radiationNow, radiationAvg, solarIrradiance) " +
+                         "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
         [Date.now(), ldata.windSpeedNow, ldata.windDirNow, ldata.windGust, ldata.windSpeedAvg, ldata.windDirAvg, ldata.temperature, ldata.dailyTempAvg || null,
-            ldata.humidity, ldata.pressure, ldata.lightness, ldata.dewPoint, ldata.absoluteHumidity, ldata.feelsLikeTemp, ldata.radiationNow, ldata.radiationAvg]);
+            ldata.humidity, ldata.pressure, ldata.lightness, ldata.dewPoint, ldata.absoluteHumidity, ldata.feelsLikeTemp, ldata.radiationNow, ldata.radiationAvg, ldata.solarIrradiance]);
     } catch (e) {
         log("DB", 0, e, true);
     } finally {
@@ -259,10 +263,10 @@ async function readPressure() {
     try{
         // myeh lets just use a lib here too :D
         let bmp180 = await BMP180({ address:0x77, mode:3, units:"metric" });
-        let data = await bmp180.read();
-        log("SENSOR", 2, "New pressure data " + data.pressure);
+        let pressure = await bmp180.readPressure();
+        log("SENSOR", 2, "New pressure data " + pressure);
         await bmp180.close();
-        return Math.round(data.pressure / 100);
+        return Math.round(pressure / 100);
     } catch(e) {
         log("SENSOR", 0, `bmp180, ${e}`, true);
     }
@@ -274,8 +278,8 @@ async function readPressure() {
  */
 async function readLight() {
     try{
-        // ran out of libs, gonna just manually read from i2c now
-        // not too hard tbh
+        // ran out of libs, gonna just manually read from i2c now on
+        // not too hard tbh, will prob give up on libs anyway
         let buffer = new Buffer.alloc(2);
         let i2c1 = await i2c.openPromisified(1);
         await i2c1.readI2cBlock(0x5c, 0x20, 2, buffer);
@@ -296,7 +300,6 @@ async function readLight() {
  */
 async function readRadiation() {
     try{
-        // smh gotta read manually here too
         let buffer = new Buffer.alloc(1);
         let i2c1 = await i2c.openPromisified(1);
         await i2c1.readI2cBlock(0x08, 0x00, 1, buffer);
@@ -309,6 +312,24 @@ async function readRadiation() {
         log("SENSOR", 0, `radiation, ${e}`, true);
     }
 }
+
+/** 
+ * Read all values from the analog to digital i2c
+ * @returns {Promise<Array<Number>>} array of all results
+ */
+async function readAnalogs() {
+    try{
+        let i2c1 = await i2c.openPromisified(1);
+        // fancy oneliner to read all channels
+        let channels = await Promise.all([...Array(4)].map(async (_, i) => await i2c1.readByte(0x48, 0x40 + i)));
+        log("SENSOR", 2, "New data from analog sensors " + channels.join(" - "));
+        await i2c1.close();
+        return channels;
+    } catch(e) {
+        log("SENSOR", 0, `pcf8591, ${e}`, true);
+    }
+}
+
 
 // the whole event loop is based on the wind sensor
 // sending data on intervals and fetching everything else
@@ -339,13 +360,21 @@ parser.on("data", async data => {
         latestTemp,
         latestPressure,
         latestLight,
-        latestRadiation
+        latestRadiation,
+        // eslint-disable-next-line no-unused-vars
+        [ ANIN0, ANIN1, ANIN2, latestSolarIrradiance ]
     ] = await Promise.all([
         readTemp(),
         readPressure(),
         readLight(),
-        readRadiation()
+        readRadiation(),
+        readAnalogs()
     ]);
+
+    // needs to be multiplied to get the correct value
+    // 8 bit converter has horrible resolution
+    // going to get get 16bit
+    latestSolarIrradiance *= 7.8;
 
     // for 10min radiation average
     if(radiationValues.length >= 600) radiationValues.shift();
@@ -373,6 +402,7 @@ parser.on("data", async data => {
         lightness: Math.round(latestLight),
         radiationNow: latestRadiation,
         radiationAvg: parseFloat(arrAvg(radiationValues).toFixed(2)),
+        solarIrradiance: latestSolarIrradiance,
         dewPoint: parseFloat(dewPoint(latestTemp.temp, latestTemp.hum).toFixed(1)),
         absoluteHumidity: parseFloat(absoluteHumidity(latestTemp.temp, latestTemp.hum).toFixed(1)),
         feelsLikeTemp: feelsLikeTemp(latestTemp.temp, wsAvg)
