@@ -2,14 +2,15 @@
     "name": "weatherapi",
     "version": "2.0.0",
     "description": "Raspberry PI Weather station, API and website",
-    "main": "index.js",
+    "main": "src/index.js",
     "homepage": "https://weather.antti.codes/",
     "repository": "https://github.com/Chicken/WeatherApi",
     "author": "Antti <antti@antti.codes>",
     "license": "MIT",
     "private": true,
     "scripts": {
-        "start": "node ."
+        "start": "node .",
+        "lint": "eslint src --fix"
     },
     "dependencies": {
         "bent": "^7.3.12",

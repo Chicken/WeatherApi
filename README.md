@@ -13,12 +13,12 @@ Device  | Address | Cmd   | Measuring
 ---     | :---:   | :---: | ---
 sht31   | 44      | ??    | temp & hum
 bmp180  | 77      | ??    | pressure
-bh1750  | 5c      | 20    | light
-cajoe   | 08      | ??    | radiation
+bh1750  | 5c      | 10    | light
+cajoe   | 08      | 00    | radiation
 ads1115 | 48      | ??    | solar irradiance
 
 ### Todo
 - modular, this file is getting way too big
 - clean up some code and api stuff
 - grafana integration
-- improve daily avarage
+- improve daily average
