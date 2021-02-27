@@ -1,4 +1,4 @@
-/* global document Image fetch */
+/* global document Image fetch window */
 // get html elements
 const canvas = document.getElementById("rose");
 const fields = {
@@ -19,7 +19,6 @@ const fields = {
     clock: document.getElementById("clock")
 };
 
-
 // get canvas context
 const ctx = canvas.getContext("2d");
 // load images for canvas
@@ -27,6 +26,77 @@ const bg = new Image();
 bg.src = "./rose.webp";
 const arrow = new Image();
 arrow.src = "./arrow.webp";
+
+// current resolution
+let currentResolution = "";
+
+// get current season
+let season;
+switch ((new Date().getMonth())) {
+    case 11:
+    case 0:
+    case 1:
+        season = "winter";
+        break;
+    case 2:
+    case 3:
+    case 4:
+        season = "spring";
+        break;
+    case 5:
+    case 6:
+    case 7:
+        season = "summer";
+        break;
+    case 8:
+    case 9:
+    case 10:
+        season = "autumn";
+        break;
+}
+
+// amount of choices for current season
+let length = {
+    summer: 13,
+    winter: 6,
+    autumn: 6,
+    spring: null // no spring images yet
+}[season];
+
+// random bg number
+let random = Math.floor(Math.random() * length) + 1;
+
+// change background resolution
+function changeBgResolution() {
+    // get screen size
+    let size;
+    let width = window.screen.width * window.devicePixelRatio;
+    if (width <= 1280) size = "low";
+    if (width > 1280 && width <= 1920) size = "medium";
+    if (width > 1920) size = "high";
+
+    // if still same resolution, return
+    if(currentResolution == size) return;
+    currentResolution = size;
+
+    let bgurl = `backgrounds/${size}/${season}/${random}.jpg`;
+
+    // preload
+    let preload = new Image();
+    preload.src = bgurl;
+    preload.onload = () => {
+        // set bg
+        let style = document.body.style;
+        style["background"] = `url("${bgurl}") no-repeat center center fixed`;
+        style["-webkit-background-size"] = "cover";
+        style["-moz-background-size"] = "cover";
+        style["-o-background-size"] = "cover";
+        style["background-size"] = "cover";
+    };
+}
+
+changeBgResolution();
+window.onresize = changeBgResolution;
 
 // function to draw the arrow pointing at a direction
 async function draw(degrees){
