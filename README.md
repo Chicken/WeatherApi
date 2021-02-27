@@ -20,7 +20,7 @@ ads1115 | 48      | ??    | solar irradiance
 Plus a Vaisala Ultrasonic Wind Sensor WS425 in serialport. 
 
 ### Todo
-- modular, this file is getting way too big
-- clean up some code and api stuff
+- even more cleanup
+- ads1115 w/ solar irradience
 - grafana integration
 - improve daily average
