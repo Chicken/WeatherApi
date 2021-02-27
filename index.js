@@ -1,18 +1,3 @@
-/*
-TODO LIST
-- modular, this file is getting way too big
-- get rid of the sht31 and bmp180 libs, would be cleaner to just manually read all from i2c
-- clean up some code and api stuff
-
-I2C ADDRESS CHEATSHEET
-device  address cmd measuring 
-sht31   44          temp&hum
-bmp180  77          pressure
-bh1750  5c      20  light
-        08      00  radiation
-pcf8591 48      43  solar irradiance
-*/
-
 // dependencies and variables
 const mariadb = require("mariadb");
 const bent = require("bent");
@@ -30,21 +15,12 @@ const cors = require("cors");
 require("dotenv").config();
 
 // global variables to save stuff
-let values = [],
+let windValues = [],
     radiationValues = [],
-    ldata,
-    raw = [],
-    todayTemps = [],
-    yesterdayAverage = undefined,
-    latestTemp = {},
-    latestPressure = 0,
-    latestLight = 0,
-    latestRadiation = 0,
+    tempValues = [],
+    ldata = {},
     latestForecast = {},
-    ANIN0,
-    ANIN1,
-    ANIN2,
-    latestSolarIrradiance;
+    yesterdayAverage;
 
 // 0 = nothing, 1 = important, 2 = website, 3 = everything
 const LOGGING_LEVEL = 2;
@@ -54,7 +30,12 @@ const LOGGING_LEVEL = 2;
  * @param {Date} date - date object to be formatted 
  * @returns {String} formatted date
  */
-let formatDate = date => `[${date.getDate()}.${date.getMonth() + 1}.${date.getFullYear()} | ${date.getHours().toString().padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}:${date.getSeconds().toString().padStart(2, "0")}]`;
+let formatDate = d => {
+    return `[${d.getDate()}.${d.getMonth() + 1}.${d.getFullYear()} |` +
+    `${d.getHours().toString().padStart(2, "0")}:` +
+    `${d.getMinutes().toString().padStart(2, "0")}:` +
+    `${d.getSeconds().toString().padStart(2, "0")}]`;
+};
 
 /**
  * Logger function
@@ -64,7 +45,10 @@ let formatDate = date => `[${date.getDate()}.${date.getMonth() + 1}.${date.getFu
  * @param {Boolean} error if true forces logging and calls console.error()
  */
 let log = (scope, level, msg, error = false) => {
-    if(LOGGING_LEVEL > level || error) console[error ? "error" : "log"](`${formatDate(new Date())} ${scope}: ${msg}`);
+    if(LOGGING_LEVEL > level || error)
+        console[error ? "error" : "log"](
+            `${formatDate(new Date())} ${scope}: ${msg}`
+        );
 }; 
 
 // db connection pool
@@ -80,7 +64,9 @@ const pool = mariadb.createPool({
 (async()=>{
     let conn = await pool.getConnection();
     try {
-        let res = await conn.query("SELECT dailyTempAvg FROM weather ORDER BY time desc LIMIT 1");
+        let res = await conn.query(
+            "SELECT dailyTempAvg FROM weather ORDER BY time desc LIMIT 1"
+        );
         yesterdayAverage = res[0].dailyTempAvg;
     } catch (e) {
         log("DB", 0, e, true);
@@ -97,22 +83,30 @@ const pool = mariadb.createPool({
 async function saveToDb() {
     let conn = await pool.getConnection();
     try {
-        await conn.query("INSERT INTO weather (time, windSpeedNow, windDirNow, windGust, windSpeedAvg, windDirAvg, temperature, dailyTempAvg, humidity, pressure, lightness, dewPoint, absoluteHumidity, feelsLikeTemp, radiationNow, radiationAvg, solarIrradiance) " +
-                         "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-        [Date.now(), ldata.windSpeedNow, ldata.windDirNow, ldata.windGust, ldata.windSpeedAvg, ldata.windDirAvg, ldata.temperature, ldata.dailyTempAvg || null,
-            ldata.humidity, ldata.pressure, ldata.lightness, ldata.dewPoint, ldata.absoluteHumidity, ldata.feelsLikeTemp, ldata.radiationNow, ldata.radiationAvg, ldata.solarIrradiance]);
+        await conn.query("INSERT INTO weather (time, windSpeedNow, "    + 
+        "windDirNow, windGust, windSpeedAvg, windDirAvg, temperature, " +
+        "dailyTempAvg, humidity, pressure, lightness, dewPoint, "       +
+        "absoluteHumidity, feelsLikeTemp, radiationNow, radiationAvg) " +
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        [
+            Date.now(), ldata.windSpeedNow, ldata.windDirNow, ldata.windGust,
+            ldata.windSpeedAvg, ldata.windDirAvg, ldata.temperature,
+            ldata.dailyTempAvg, ldata.humidity, ldata.pressure, ldata.lightness,
+            ldata.dewPoint, ldata.absoluteHumidity, ldata.feelsLikeTemp,
+            ldata.radiationNow, ldata.radiationAvg
+        ]);
+        log("DB", 0, "Saved weather to database.");
     } catch (e) {
         log("DB", 0, e, true);
     } finally {
-        log("DB", 0, "Saved weather to database.");
         conn.release();
     }
 }
 
 // save the data at startup
-setTimeout(saveToDb, 1000*30);
+setTimeout(saveToDb, 1000 * 30);
 // and on intervals of 10 minutes
-setInterval(saveToDb, 1000*60*10);
+setInterval(saveToDb, 1000 * 60 * 10);
 
 // dailyaverage timer
 // probably overcomplicated
@@ -121,12 +115,12 @@ let currentHours = currentTime.getHours();
 let currentMinutes = currentTime.getMinutes();
 let timeTillStart = 24 * 60 - (currentHours * 60 + currentMinutes);
 setTimeout(() => {
-    todayTemps.push(latestTemp.temp);
+    tempValues.push(ldata.temperature);
     setInterval(() => {
-        todayTemps.push(latestTemp.temp);
-        if(todayTemps.length == 8) {
-            yesterdayAverage = todayTemps.reduce((a, b) => a + b) / 8;
-            todayTemps = [];
+        tempValues.push(ldata.temperature);
+        if(tempValues.length == 8) {
+            yesterdayAverage = tempValues.reduce((a, b) => a + b) / 8;
+            tempValues = [];
         }
     }, 3 * 60 * 60 * 1000);
 }, timeTillStart * 60 * 1000);
@@ -134,7 +128,10 @@ setTimeout(() => {
 // forecast fetch loop
 async function fetchForecast() {
     log("THIRD PARTY", 2, "Forecast data fetched");
-    latestForecast = await bent(200, "json")(`https://api.openweathermap.org/data/2.5/onecall?lat=65.012615&lon=25.471453&units=metric&lang=en&exclude=minutely&appid=${process.env.key}`);
+    latestForecast = await bent(200, "json")(
+        "https://api.openweathermap.org/data/2.5/onecall" +
+        "?lat=65.012615&lon=25.471453&units=metric&lang=en " +
+        `&exclude=minutely&appid=${process.env.key}`);
 }
 fetchForecast();
 setInterval(fetchForecast, 1000 * 60 * 10);
@@ -144,36 +141,8 @@ app.use(cors({
     origin: "*"
 }));
 
-// main page
-app.get("/",(_req, res)=>{
-    log("WEBPAGE", 1, "Visited");
-    res.sendFile(__dirname + "/index.html");
-});
-
-// worker
-app.get("/worker.js", (_req, res) => {
-    res.sendFile(__dirname + "/worker.js");
-});
-
 // static files
-app.use("/media", express.static(__dirname + "/media"));
-
-// api doc
-app.get("/api", (_req, res) => {
-    log("WEBPAGE", 1, "Api docs visited");
-    res.send(
-        `API DOCS<br>
-    <br>
-    all endpoints return json data.
-    GET /api/raw - raw wind data <br>
-    GET /api/parsed - parsed wind data <br>
-    GET /api/weather - all the weather info <br>
-    GET /api/forecast - parsed forecast <br>
-    GET /api/forecast/all - latest forecast fetched from openweathermap <br>
-    <br>
-    &copy; Antti.Codes 2021`
-    );
-});
+app.use(express.static("static"));
 
 // forecast
 app.get("/api/forecast", (_req, res) => {
@@ -191,7 +160,7 @@ app.get("/api/forecast", (_req, res) => {
             summary: latestForecast.daily[0].weather[0].description,
             icon: latestForecast.daily[0].weather[0].icon
         },
-        week: latestForecast.daily.map(v=>{
+        week: latestForecast.daily.map(v => {
             return {
                 time: v.dt,
                 temp: {
@@ -207,28 +176,10 @@ app.get("/api/forecast", (_req, res) => {
     });
 });
 
-// forecast but raw 3rd party api response, why do we need this again?
-app.get("/api/forecast/all", (_req, res)=>{
-    log("API", 2, "Raw forecast fetched");
-    res.send(latestForecast);
-});
-
 // all the weather data, this is the only useful endpoint
 app.get("/api/weather", (_req, res) => {
     log("API", 2, "Weather data fetched");
     res.send(ldata);
-});
-
-// raw wind sensor data, why do we need this again? probably debugging
-app.get("/api/raw", (_req, res) => {
-    log("API", 2, "Raw wind data fetched");
-    res.send(raw);
-});
-
-// parsed wind sensor data, why do we need this again?
-app.get("/api/parsed", (_req, res) => {
-    log("API", 2, "Parsed wind data fetched");
-    res.send(values);
 });
 
 // listen for requests
@@ -238,7 +189,8 @@ app.listen(process.env.PORT, () => {
 
 /** 
  * Read the temperature
- * @returns {Promise<{temp: Number, hum: Number}>} temperature and humidity object
+ * @returns {Promise<{temp: Number, hum: Number}>}
+ * temperature and humidity object
  */
 async function readTemp() {
     try{
@@ -247,7 +199,7 @@ async function readTemp() {
         let data = await sht31.readSensorData();
         let temp = parseFloat(data.temperature.toFixed(1));
         let hum = Math.round(data.humidity);
-        log("SENSOR", 2, "New temperature and humidity data " + temp + " " + hum);
+        log("SENSOR", 2, `New temperature and humidity data, ${temp}, ${hum}`);
         // fancy temp sensor gives humidity too
         return { temp, hum };
     } catch(e) {
@@ -278,17 +230,15 @@ async function readPressure() {
  */
 async function readLight() {
     try{
-        // ran out of libs, gonna just manually read from i2c now on
-        // not too hard tbh, will prob give up on libs anyway
-        let buffer = new Buffer.alloc(2);
+        // magic manual reading stuff
+        let buff = new Buffer.alloc(2);
         let i2c1 = await i2c.openPromisified(1);
-        await i2c1.readI2cBlock(0x5c, 0x20, 2, buffer);
-        log("SENSOR", 2, "New light data " + ((buffer[1] + (256 * buffer[0])) / 1.2));
-        // gotta remember to close connection
-        // had errors with these before
+        await i2c1.readI2cBlock(0x5c, 0x20, 2, buff);
+        // magic math
+        let data = parseFloat(((buff[1] + (256 * buff[0])) / 1.2).toFixed(1));
+        log("SENSOR", 2, `New light data, ${data}`);
         await i2c1.close();
-        // OK WTF IS THIS MAGIC MATH
-        return parseFloat(((buffer[1] + (256 * buffer[0])) / 1.2).toFixed(1));
+        return Math.round(data);
     } catch(e) {
         log("SENSOR", 0, `bh1750, ${e}`, true);
     }
@@ -308,28 +258,9 @@ async function readRadiation() {
         // this time no fancy math
         return buffer[0] / 100;
     } catch(e) {
-        // I don't know the name of sensor ok?
-        log("SENSOR", 0, `radiation, ${e}`, true);
+        log("SENSOR", 0, `cajoe, ${e}`, true);
     }
 }
-
-/** 
- * Read all values from the analog to digital i2c
- * @returns {Promise<Array<Number>>} array of all results
- */
-async function readAnalogs() {
-    try{
-        let i2c1 = await i2c.openPromisified(1);
-        // fancy oneliner to read all channels
-        let channels = await Promise.all([...Array(4)].map(async (_, i) => await i2c1.readByte(0x48, 0x40 + i)));
-        log("SENSOR", 2, "New data from analog sensors " + channels.join(" - "));
-        await i2c1.close();
-        return channels;
-    } catch(e) {
-        log("SENSOR", 0, `pcf8591, ${e}`, true);
-    }
-}
-
 
 // the whole event loop is based on the wind sensor
 // sending data on intervals and fetching everything else
@@ -341,71 +272,70 @@ parser.on("data", async data => {
     // take the latest valid data
     if(data[5].startsWith("V")) {
         log("SENSOR", 0, "Invalid wind data " + data, true);
-        data = raw[raw.length - 1].split(",");
+        try {
+            data = windValues[windValues.length - 1];
+        } catch(e) {
+            log("SENSOR", 0, "No valid past values", true);
+            return;
+        }
     } else {
         log("SENSOR", 2, "New wind data " + data);
+        data = {
+            direction: parseInt(data[1]),
+            speed: parseFloat(data[3])
+        };
     }
+
     // we get data every second so 600 seconds is 10 minutes
     // this is needed to calculate the average and gust
-    if(raw.length >= 600) raw.shift();
-    raw.push(data.join(","));
-    data = {
-        direction: parseInt(data[1]),
-        speed: parseFloat(data[3])
-    };
-    if(values.length >= 600) values.shift();
-    values.push(data);
+    if (windValues.length >= 600) windValues.shift();
+    windValues.push(data);
+    
     // use of promise.all and destructuring for neat code
-    [
-        latestTemp,
-        latestPressure,
-        latestLight,
-        latestRadiation,
-        // eslint-disable-next-line no-unused-vars
-        [ ANIN0, ANIN1, ANIN2, latestSolarIrradiance ]
+    let [
+        { temp, hum },
+        pressure,
+        lightness,
+        radiation
     ] = await Promise.all([
         readTemp(),
         readPressure(),
         readLight(),
-        readRadiation(),
-        readAnalogs()
+        readRadiation()
     ]);
-
-    // needs to be multiplied to get the correct value
-    // 8 bit converter has horrible resolution
-    // going to get get 16bit
-    latestSolarIrradiance *= 7.8;
 
     // for 10min radiation average
     if(radiationValues.length >= 600) radiationValues.shift();
-    radiationValues.push(latestRadiation);
+    radiationValues.push(radiation);
 
     // windspeed average
-    let wsAvg = parseFloat(arrAvg(values.map(v => v.speed)).toFixed(1));
+    let wsAvg = parseFloat(arrAvg(windValues.map(v => v.speed)).toFixed(1));
     // yeah we do this giant object in the fly too
     // looks messy, is messy
     ldata = {
-        windSpeedNow: values[values.length - 1].speed,
-        windSpeedNowText: getSpeedText(values[values.length - 1].speed),
-        windDirNow: values[values.length - 1].direction,
-        windDirNowText: getDirectionText(values[values.length - 1].direction),
-        windGust: Math.max(...values.map(v => v.speed)),
-        windGustText: getSpeedText(Math.max(...values.map(v => v.speed))),
+        windSpeedNow: windValues[windValues.length - 1].speed,
+        windSpeedNowText: getSpeedText(windValues[windValues.length - 1].speed),
+        windDirNow: windValues[windValues.length - 1].direction,
+        windDirNowText:
+            getDirectionText(windValues[windValues.length - 1].direction),
+        windGust: Math.max(...windValues.map(v => v.speed)),
+        windGustText: getSpeedText(Math.max(...windValues.map(v => v.speed))),
         windSpeedAvg: wsAvg,
-        windSpeedAvgText: getSpeedText(arrAvg(values.map(v => v.speed))),
-        windDirAvg: Math.round(getAverage(values.map(v => v.direction)).toFixed(1)),
-        windDirAvgText: getDirectionText(getAverage(values.map(v => v.direction))),
-        temperature: latestTemp.temp,
-        dailyTempAvg: yesterdayAverage ? parseFloat(yesterdayAverage.toFixed(1)) : undefined,
-        humidity: latestTemp.hum,
-        pressure: latestPressure,
-        lightness: Math.round(latestLight),
-        radiationNow: latestRadiation,
+        windSpeedAvgText: getSpeedText(arrAvg(windValues.map(v => v.speed))),
+        windDirAvg:
+            Math.round(getAverage(windValues.map(v => v.direction)).toFixed(1)),
+        windDirAvgText:
+            getDirectionText(getAverage(windValues.map(v => v.direction))),
+        temperature: temp,
+        dailyTempAvg: parseFloat(yesterdayAverage.toFixed(1)),
+        humidity: hum,
+        pressure,
+        lightness,
+        radiationNow: radiation,
         radiationAvg: parseFloat(arrAvg(radiationValues).toFixed(2)),
-        solarIrradiance: latestSolarIrradiance,
-        dewPoint: parseFloat(dewPoint(latestTemp.temp, latestTemp.hum).toFixed(1)),
-        absoluteHumidity: parseFloat(absoluteHumidity(latestTemp.temp, latestTemp.hum).toFixed(1)),
-        feelsLikeTemp: feelsLikeTemp(latestTemp.temp, wsAvg)
+        dewPoint: parseFloat(dewPoint(temp, hum).toFixed(1)),
+        absoluteHumidity: parseFloat(absoluteHumidity(temp, hum).toFixed(1)),
+        feelsLikeTemp: feelsLikeTemp(temp, wsAvg)
     };
 });
 
@@ -528,7 +458,9 @@ function dewPoint(temp, hum) {
  * @param {Number} hum - relative humidity
  * @returns {Number} absolute humidity in grams per cube meter
  */
-let absoluteHumidity = (temp, hum) => 216.7*(hum/100*6.112*Math.exp(17.62*temp/(243.12+temp))/(273.15+temp));
+let absoluteHumidity = (temp, hum) =>
+    216.7 * (hum / 100 * 6.112 * Math.exp(17.62 * 
+    temp / (243.12 + temp)) / (273.15 + temp));
 
 /**
  * Calculate feels like temperature
@@ -538,7 +470,8 @@ let absoluteHumidity = (temp, hum) => 216.7*(hum/100*6.112*Math.exp(17.62*temp/(
  */
 function feelsLikeTemp(temp, vel) {
     if(temp > 10 || vel < 1.5) return temp;
-    return (13.12 + 0.6215 * temp - 13.956 * Math.pow(vel, 0.16) + 0.4867 * temp * Math.pow(vel, 0.16)).toFixed(1);
+    return (13.12 + 0.6215 * temp - 13.956 * Math.pow(vel, 0.16)
+            + 0.4867 * temp * Math.pow(vel, 0.16)).toFixed(1);
 }
 
 log("APP", 0, "started");

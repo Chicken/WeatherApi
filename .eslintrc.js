@@ -1,7 +1,7 @@
 module.exports = {
     "env": {
         "commonjs": true,
-        "es2020": true,
+        "es2021": true,
         "node": true
     },
     "extends": "eslint:recommended",
@@ -25,7 +25,14 @@ module.exports = {
             "error",
             "always"
         ],
+        "max-len": "error",
         "no-var": "error",
-        "no-empty": ["error", { "allowEmptyCatch": true }]
+        "space-infix-ops": "error",
+        "no-empty": [
+            "error",
+            {
+                "allowEmptyCatch": true
+            }
+        ]
     }
 };

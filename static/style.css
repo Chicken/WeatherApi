@@ -4,7 +4,10 @@ html, body {
     padding: 0px;
     text-align: center;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-image: url("bg.webp");
+    background: url("bg.webp") no-repeat center center fixed;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
     background-size: cover;
     color: white;
 }
@@ -50,6 +53,7 @@ p {
     border: 10px solid rgba(192,192,192,0.7);
     border-radius: 1024px;
     width: 40%;
+    height: 40%;
 }
 
 .large {
@@ -66,7 +70,7 @@ p {
     margin-top: 3.5%;
     background-color: rgba(192,192,192,0.4);
     width: 24vw;
-    height: 20%;
+    height: 20vh;
 }
 
 .section {
@@ -92,17 +96,3 @@ p {
     float: right; 
     width: 25vw; 
 } 
-
-.skip-link {
-    position: absolute;
-    top: -40px;
-    left: 0;
-    background: #000000;
-    color: white;
-    padding: 8px;
-    z-index: 100;
-}
-  
-.skip-link:focus {
-    top: 0;
-}

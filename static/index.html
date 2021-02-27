@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="description" content="Antti.Codes Weather Station Display">
+		<meta name="theme-color" content="#FDF648"></meta>
+		<title>WeatherScreen</title>
+		<link rel="stylesheet" href="./style.css">
+		<link rel="icon" href="./icon.png" type="image/png" />
+		<script src="./script.js" defer></script>
+	</head>
+	<body>
+		<div class="section left">
+			<div class="sub">
+				<p class="data" id="field1"></p>
+			</div>
+			<div class="sub">
+				<p class="data" id="field2"></p>
+			</div>
+			<div class="sub">
+				<p class="data" id="field3"></p>
+			</div>
+			<div class="sub">
+				<p class="data" id="field4"></p>
+			</div>
+		</div>
+		
+		<div class="section middle">
+			<div class="large" id="clock"></div>
+			<div class="large" id="templarge"></div>
+			<img alt="" id="icon">
+			<div class="windrose">
+				<canvas width="1000" height="1000" id="rose"></canvas> 
+			</div> 
+            <p class="copyright">
+                &copy; Antti.Codes 2021<br>
+                <a rel="noreferrer" href="https://github.com/Chicken/WeatherApi" target="_blank">Source on github</a><br>
+				<a rel="noreferrer" href="https://grafana.antti.codes/d/yCiX9gKMk/weather" target="_blank">Long term data exploration</a>
+            </p>
+		</div>
+
+		<div class="section right">
+			<div class="sub">
+				<p class="data" id="field5"></p>
+			</div>
+			<div class="sub">
+				<p class="data" id="field6"></p>
+			</div>
+			<div class="sub">
+				<p class="data" id="field7"></p>
+			</div>
+			<div class="sub">
+				<p class="data" id="field8"></p>
+			</div>
+		</div>
+	 </body>
+</html>

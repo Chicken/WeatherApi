@@ -1,19 +1,28 @@
 {
-  "name": "weatherapi",
-  "version": "1.0.0",
-  "description": "Raspberry PI Weather station, API and website",
-  "main": "index.js",
-  "author": "antti@antti.codes",
-  "license": "MIT",
-  "dependencies": {
-    "bent": "^7.3.12",
-    "bmp180-sensor": "^1.1.0",
-    "cors": "^2.8.5",
-    "dotenv": "^8.2.0",
-    "express": "^4.17.1",
-    "i2c-bus": "^5.2.1",
-    "mariadb": "^2.5.2",
-    "raspi-node-sht31": "^1.0.1",
-    "serialport": "^9.0.6"
-  }
+    "name": "weatherapi",
+    "version": "2.0.0",
+    "description": "Raspberry PI Weather station, API and website",
+    "main": "index.js",
+    "homepage": "https://weather.antti.codes/",
+    "repository": "https://github.com/Chicken/WeatherApi",
+    "author": "Antti <antti@antti.codes>",
+    "license": "MIT",
+    "private": true,
+    "scripts": {
+        "start": "node ."
+    },
+    "dependencies": {
+        "bent": "^7.3.12",
+        "bmp180-sensor": "^1.1.0",
+        "cors": "^2.8.5",
+        "dotenv": "^8.2.0",
+        "express": "^4.17.1",
+        "i2c-bus": "^5.2.1",
+        "mariadb": "^2.5.2",
+        "raspi-node-sht31": "^1.0.1",
+        "serialport": "^9.0.6"
+    },
+    "devDependencies": {
+        "eslint": "^7.20.0"
+    }
 }
