@@ -12,6 +12,6 @@ module.exports = class Forecast {
         this.latest = await bent(200, "json")(
             "https://api.openweathermap.org/data/2.5/onecall" +
             "?lat=65.012615&lon=25.471453&units=metric&lang=en " +
-            `&exclude=minutely&appid=${process.env.openweathermap}`);
+            `&exclude=minutely&appid=${process.env.OPENWEATHERMAP}`);
     }
 };

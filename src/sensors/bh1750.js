@@ -12,10 +12,10 @@ module.exports = async () => {
         let i2c1 = await i2c.openPromisified(1);
         await i2c1.readI2cBlock(0x5c, 0x10, 2, buff);
         // magic math
-        let data = parseFloat(((buff[1] + (256 * buff[0])) / 1.2).toFixed(1));
+        let data = Math.round((buff[1] + (256 * buff[0])) / 1.2);
         log("SENSOR", 2, `New light data, ${data}`);
         await i2c1.close();
-        return Math.round(data);
+        return data;
     } catch(e) {
         log("SENSOR", 0, `bh1750, ${e}`, true);
     }

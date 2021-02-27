@@ -17,6 +17,8 @@ bh1750  | 5c      | 10    | light
 cajoe   | 08      | 00    | radiation
 ads1115 | 48      | ??    | solar irradiance
 
+Plus a Vaisala Ultrasonic Wind Sensor WS425 in serialport. 
+
 ### Todo
 - modular, this file is getting way too big
 - clean up some code and api stuff
