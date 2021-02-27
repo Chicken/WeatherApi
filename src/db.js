@@ -36,23 +36,7 @@ module.exports = class Database {
 
     /**
      * Save the data to database
-     * @param {Object} data - weather data  
-     * @param {number} data.windSpeedNow
-     * @param {number} data.windDirNow
-     * @param {number} data.windGust
-     * @param {number} data.windSpeedAvg
-     * @param {number} data.windDirAvg
-     * @param {number} data.temperature
-     * @param {number} data.dailyTempAvg
-     * @param {number} data.humidity
-     * @param {number} data.pressure
-     * @param {number} data.lightness
-     * @param {number} data.dewPont
-     * @param {number} data.absoluteHumidity
-     * @param {number} data.feelsLikeTemp
-     * @param {number} data.radiationNow
-     * @param {number} data.radiationAvg
-     * 
+     * @param {Object} data - weather data
      */
     async save(data) {
         let conn = await this.pool.getConnection();
@@ -65,9 +49,9 @@ module.exports = class Database {
             [
                 Date.now(), data.windSpeedNow, data.windDirNow, data.windGust,
                 data.windSpeedAvg, data.windDirAvg, data.temperature,
-                data.dailyTempAvg, data.humidity, data.pressure, data.lightness,
-                data.dewPoint, data.absoluteHumidity, data.feelsLikeTemp,
-                data.radiationNow, data.radiationAvg
+                data.dailyTempAvg ?? null, data.humidity, data.pressure,
+                data.lightness, data.dewPoint, data.absoluteHumidity,
+                data.feelsLikeTemp, data.radiationNow, data.radiationAvg
             ]);
             log("DB", 0, "Saved weather to database.");
         } catch (e) {
