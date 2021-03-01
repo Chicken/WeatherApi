@@ -60,7 +60,7 @@ let length = {
     summer: 13,
     winter: 6,
     autumn: 6,
-    spring: null // no spring images yet
+    spring: 5
 }[season];
 
 // random bg number
