@@ -32,26 +32,3 @@ Plus a Vaisala Ultrasonic Wind Sensor WS425 in serialport.
 ### Database
 
 Currently running MariaDB on a VPS.  
-
-Table structure from mysqldump:
-```sql
-CREATE TABLE `weather` (
-  `time` double DEFAULT NULL,
-  `windSpeedNow` float DEFAULT NULL,
-  `windDirNow` int(11) DEFAULT NULL,
-  `windGust` float DEFAULT NULL,
-  `windSpeedAvg` float DEFAULT NULL,
-  `windDirAvg` int(11) DEFAULT NULL,
-  `temperature` float DEFAULT NULL,
-  `dailyTempAvg` float DEFAULT NULL,
-  `humidity` int(11) DEFAULT NULL,
-  `pressure` int(11) DEFAULT NULL,
-  `lightness` int(11) DEFAULT NULL,
-  `dewPoint` float DEFAULT NULL,
-  `absoluteHumidity` float DEFAULT NULL,
-  `feelsLikeTemp` float DEFAULT NULL,
-  `radiationNow` float DEFAULT NULL,
-  `radiationAvg` float DEFAULT NULL,
-  `solarIrradiance` float DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-```

@@ -13,6 +13,7 @@
         "lint": "eslint src --fix"
     },
     "dependencies": {
+        "ads1115": "^1.2.0",
         "bent": "^7.3.12",
         "bmp180-sensor": "^1.1.0",
         "cors": "^2.8.5",

@@ -163,6 +163,7 @@ async function update() {
     fields.left[3].innerHTML =
     `Pressure: ${data.pressure} hPa <br>
     Lightness: ${data.lightness} lx <br>
+    Solar Irradiance: ${data.solarIrradiance} W/m² <br>
     Radiation: ${data.radiationAvg} &micro;Sv/h <br>`;
 
     // calculate length of day manually cuz im stupid

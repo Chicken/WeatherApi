@@ -14,6 +14,7 @@ const readTemp = require("./sensors/sht31");
 const readPressure = require("./sensors/bmp180");
 const readLight = require("./sensors/bh1750");
 const readRadiation = require("./sensors/cajoe");
+const readAnalog = require("./sensors/ads1115");
 
 const db = new (require("./db"));
 const forecast = new (require("./forecast"));
@@ -36,8 +37,10 @@ let windValues = [],
     ldata = {},
     yesterdayAverage;
 
-// fetch yesterdays average temperature and save it
-db.getDailyAverage().then(res => yesterdayAverage = res);
+// db setup and fetch yesterdays average temperature
+db.setup().then(() => {
+    db.getDailyAverage().then(res => yesterdayAverage = res);
+});
 
 // workaround for "this" being undefined
 let save = () => db.save(ldata);
@@ -47,7 +50,7 @@ setTimeout(save, 1000 * 30);
 setInterval(save, 1000 * 60 * 10);
 
 // dailyaverage timer
-// probably overcomplicated
+// probably overcomplicated and stupid
 let currentTime = new Date();
 let currentHours = currentTime.getHours();
 let currentMinutes = currentTime.getMinutes();
@@ -57,7 +60,10 @@ setTimeout(() => {
     setInterval(() => {
         tempValues.push(ldata.temperature);
         if(tempValues.length == 8) {
-            yesterdayAverage = tempValues.reduce((a, b) => a + b) / 8;
+            yesterdayAverage = parseFloat(
+                (tempValues.reduce((a, b) => a + b) / 8).toFixed(1)
+            );
+            db.saveDailyAvg(yesterdayAverage);
             tempValues = [];
         }
     }, 3 * 60 * 60 * 1000);
@@ -147,13 +153,18 @@ parser.on("data", async data => {
         { temp, hum },
         pressure,
         lightness,
-        radiation
+        radiation,
+        [ solarIrradiance ]
     ] = await Promise.all([
         readTemp(),
         readPressure(),
         readLight(),
-        readRadiation()
+        readRadiation(),
+        readAnalog()
     ]);
+
+    // correction math for analog sensors
+    solarIrradiance = Math.round((solarIrradiance * 0.125) / 1.67);
 
     // for 10min radiation average
     if(radiationValues.length >= 600) radiationValues.shift();
@@ -178,10 +189,11 @@ parser.on("data", async data => {
         windDirAvgText:
             getDirectionText(getAverage(windValues.map(v => v.direction))),
         temperature: temp,
-        dailyTempAvg: parseFloat(yesterdayAverage.toFixed(1)),
+        dailyTempAvg: yesterdayAverage,
         humidity: hum,
         pressure,
         lightness,
+        solarIrradiance,
         radiationNow: radiation,
         radiationAvg: parseFloat(arrAvg(radiationValues).toFixed(2)),
         dewPoint: parseFloat(dewPoint(temp, hum).toFixed(1)),

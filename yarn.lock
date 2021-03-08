@@ -138,6 +138,13 @@ acorn@^7.4.0:
   resolved "https://registry.yarnpkg.com/acorn/-/acorn-7.4.1.tgz#feaed255973d2e77555b83dbc08851a6c63520fa"
   integrity sha512-nQyp0o1/mNdbTO1PO6kHkwSrmgZ0MT/jCCpNiwbUjGoRN4dlBhqJtoQuCnEOKzgTVwg0ZWiCoQy6SxMebQVh8A==
 
+ads1115@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/ads1115/-/ads1115-1.2.0.tgz#cdd0609dbfc3586e5b4a24befc0d2b94800de32d"
+  integrity sha512-4mdm9pCw8PwxxT6fYaU3+T8MUHtMyQpeB2ZDJYqbRVLKFyyfmiulO4saSQIN+BTCbz3KJX9vLwnv5+VkV1lp4g==
+  dependencies:
+    debug "^4.1.1"
+
 ajv@^6.10.0, ajv@^6.12.4:
   version "6.12.6"
   resolved "https://registry.yarnpkg.com/ajv/-/ajv-6.12.6.tgz#baf5a62e802b07d977034586f8c3baf5adf26df4"

@@ -11,7 +11,6 @@ module.exports = async () => {
         let buff = new Buffer.alloc(2);
         let i2c1 = await i2c.openPromisified(1);
         await i2c1.readI2cBlock(0x5c, 0x10, 2, buff);
-        // magic math
         let data = Math.round((buff[1] + (256 * buff[0])) / 1.2);
         log("SENSOR", 2, `New light data, ${data}`);
         await i2c1.close();
