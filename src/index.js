@@ -16,8 +16,8 @@ const readLight = require("./sensors/bh1750");
 const readRadiation = require("./sensors/cajoe");
 const readAnalog = require("./sensors/ads1115");
 
-const db = new (require("./db"));
-const forecast = new (require("./forecast"));
+const db = new (require("./db"))();
+const forecast = new (require("./forecast"))();
 const {
     arrAvg,
     getSpeedText,
@@ -77,34 +77,7 @@ app.use(cors({
 // forecast
 app.get("/api/forecast", async (_req, res) => {
     log("API", 2, "Forecasts fetched");
-    // yeah we making this object up on the fly
-    // probably not good
-    let latest = forecast.latest;
-    res.send({
-        today: {
-            sunrise: latest.current.sunrise,
-            sunset: latest.current.sunset,
-            temp: latest.daily[0].temp,
-            feels: latest.daily[0].feels_like,
-            uv: latest.daily[0].uvi,
-            windspeed: latest.daily[0].wind_speed,
-            summary: latest.daily[0].weather[0].description,
-            icon: latest.daily[0].weather[0].icon
-        },
-        week: latest.daily.map(v => {
-            return {
-                time: v.dt,
-                temp: {
-                    max: v.temp.max,
-                    min: v.temp.min
-                },
-                icon: v.weather[0].icon,
-                windspeed: v.wind_speed,
-                sunrise: v.sunrise,
-                sunset: v.sunset,
-            };
-        })
-    });
+    res.send(forecast.latest);
 });
 
 // all the weather data, this is the only useful endpoint
