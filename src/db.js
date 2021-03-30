@@ -41,7 +41,8 @@ module.exports = class Database {
                 feelsLikeTemp float,
                 radiationNow float,
                 radiationAvg float,
-                solarIrradiance int(11)
+                solarIrradiance int(11),
+                rainIntensity int(11)
                 );`
             );
         } catch (e) {
@@ -87,14 +88,15 @@ module.exports = class Database {
             await conn.query("INSERT INTO weather (time, windSpeedNow, "    + 
             "windDirNow, windGust, windSpeedAvg, windDirAvg, temperature, " +
             "humidity, pressure, lightness, dewPoint, solarIrradiance, "    +
-            "absoluteHumidity, feelsLikeTemp, radiationNow, radiationAvg) " +
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            "absoluteHumidity, feelsLikeTemp, radiationNow, radiationAvg, " +
+            "rainIntensity)" +
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             [
                 Date.now(), data.windSpeedNow, data.windDirNow, data.windGust,
                 data.windSpeedAvg, data.windDirAvg, data.temperature,
                 data.humidity, data.pressure, data.lightness, data.dewPoint, 
                 data.solarIrradiance, data.absoluteHumidity, data.feelsLikeTemp,
-                data.radiationNow, data.radiationAvg
+                data.radiationNow, data.radiationAvg, data.rainIntensity
             ]);
             log("DB", 0, "Saved weather to database.");
         } catch (e) {

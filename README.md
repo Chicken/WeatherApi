@@ -16,19 +16,14 @@ sht31   | 44      | ??    | temp & hum
 bmp180  | 77      | ??    | pressure
 bh1750  | 5c      | 10    | light
 cajoe   | 08      | 00    | radiation
-ads1115 | 48      | ??    | solar irradiance
+ads1115 | 48      | ??    | solar irradiance & rain intensity
 
+Ads1115 is a 16bit analog to digital convertor.
 Plus a Vaisala Ultrasonic Wind Sensor WS425 in serialport. 
 
 ### Todo
 
-- even more cleanup
-- ads1115 w/ solar irradience
 - grafana integration
 - improve daily average
 - touch screen version
 - error webhook to discord
-
-### Database
-
-Currently running MariaDB on a VPS.  

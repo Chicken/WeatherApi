@@ -120,14 +120,14 @@ parser.on("data", async data => {
     // this is needed to calculate the average and gust
     if (windValues.length >= 600) windValues.shift();
     windValues.push(data);
-    
+
     // use of promise.all and destructuring for neat code
     let [
         { temp, hum },
         pressure,
         lightness,
         radiation,
-        [ solarIrradiance ]
+        [ solarIrradiance, rainIntensity ]
     ] = await Promise.all([
         readTemp(),
         readPressure(),
@@ -138,6 +138,9 @@ parser.on("data", async data => {
 
     // correction math for analog sensors
     solarIrradiance = Math.round((solarIrradiance * 0.125) / 1.67);
+    // 23500 is just some arbitary number I just made up
+    rainIntensity = 23500 - rainIntensity;
+    rainIntensity = rainIntensity < 0 ? 0 : Math.round(rainIntensity / 23500);
 
     // for 10min radiation average
     if(radiationValues.length >= 600) radiationValues.shift();
@@ -164,6 +167,7 @@ parser.on("data", async data => {
         temperature: temp,
         dailyTempAvg: yesterdayAverage,
         humidity: hum,
+        rainIntensity,
         pressure,
         lightness,
         solarIrradiance,
