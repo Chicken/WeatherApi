@@ -158,7 +158,7 @@ async function update() {
     fields.left[2].innerHTML =
     `Humidity: ${data.humidity} % <br>
     Abs. Humidity: ${data.absoluteHumidity} g/m³ <br>
-    Dew Point: ${data.dewPoint} &#176;C
+    Dew Point: ${data.dewPoint} &#176;C <br>
     Rain Intensity: ${data.rainIntensity} %`;
 
     fields.left[3].innerHTML =
