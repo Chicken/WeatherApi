@@ -1,6 +1,8 @@
 // dependencies and variables
 require("dotenv").config();
 
+const cron = require("node-cron");
+
 const SerialPort = require("serialport");
 const Readline = require("@serialport/parser-readline");
 const port = new SerialPort("/dev/serial0", { baudRate: 9600 });
@@ -49,25 +51,19 @@ setTimeout(save, 1000 * 30);
 // and on intervals of 10 minutes
 setInterval(save, 1000 * 60 * 10);
 
-// dailyaverage timer
-// probably overcomplicated and stupid
-let currentTime = new Date();
-let currentHours = currentTime.getHours();
-let currentMinutes = currentTime.getMinutes();
-let timeTillStart = 24 * 60 - (currentHours * 60 + currentMinutes);
-setTimeout(() => {
+// every 3 hours
+cron.schedule("0 */3 * * *", () => {
     tempValues.push(ldata.temperature);
-    setInterval(() => {
-        tempValues.push(ldata.temperature);
-        if(tempValues.length == 8) {
-            yesterdayAverage = parseFloat(
-                (tempValues.reduce((a, b) => a + b) / 8).toFixed(1)
-            );
-            db.saveDailyAvg(yesterdayAverage);
-            tempValues = [];
-        }
-    }, 3 * 60 * 60 * 1000);
-}, timeTillStart * 60 * 1000);
+});
+
+// 30min after midnight
+cron.schedule("30 0 * * *", () => {
+    yesterdayAverage = parseFloat(
+        (tempValues.reduce((a, b) => a + b) / 8).toFixed(1)
+    );
+    db.saveDailyAvg(yesterdayAverage);
+    tempValues = [];
+});
 
 // cors, web logging and static files
 app.use(cors({
@@ -148,6 +144,7 @@ parser.on("data", async data => {
 
     // windspeed average
     let wsAvg = parseFloat(arrAvg(windValues.map(v => v.speed)).toFixed(1));
+
     // yeah we do this giant object in the fly too
     // looks messy, is messy
     ldata = {

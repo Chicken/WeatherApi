@@ -21,6 +21,7 @@
         "express": "^4.17.1",
         "i2c-bus": "^5.2.1",
         "mariadb": "^2.5.2",
+        "node-cron": "^3.0.0",
         "raspi-node-sht31": "^1.0.1",
         "serialport": "^9.0.6"
     },
