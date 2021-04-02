@@ -142,8 +142,8 @@ parser.on("data", async data => {
     rainIntensity = 23500 - rainIntensity;
     rainIntensity = rainIntensity < 0 ? 0 : Math.round(rainIntensity / 23500);
 
-    // for 10min radiation average
-    if(radiationValues.length >= 600) radiationValues.shift();
+    // for 1 hour radiation average
+    if(radiationValues.length >= 3600) radiationValues.shift();
     radiationValues.push(radiation);
 
     // windspeed average
