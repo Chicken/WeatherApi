@@ -82,6 +82,12 @@ app.get("/api/weather", (_req, res) => {
     res.send(ldata);
 });
 
+// alternative endpoint for /mobile.json
+app.get("/api/mobile", (_req, res) => {
+    log("API", 2, "Mobile metadata fetched");
+    res.sendFile(__dirname + "/static/mobile.json");
+});
+
 // listen for requests
 app.listen(process.env.PORT, () => {
     log("APP", 0, "Server online");
