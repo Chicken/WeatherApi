@@ -44,12 +44,14 @@ db.setup().then(() => {
     db.getDailyAverage().then(res => yesterdayAverage = res);
 });
 
-// workaround for "this" being undefined
-let save = () => db.save(ldata);
-// save the data at startup
-setTimeout(save, 1000 * 30);
-// and on intervals of 10 minutes
-setInterval(save, 1000 * 60 * 10);
+setTimeout(() => {
+    // save the data at startup (useful for testing)
+    db.save(ldata);
+    // save data every tenth minute
+    cron.schedule("*/10 * * * *", () => {
+        db.save(ldata);
+    });
+}, 1000 * 30);
 
 // every 3 hours
 cron.schedule("0 */3 * * *", () => {
@@ -58,6 +60,8 @@ cron.schedule("0 */3 * * *", () => {
 
 // 30min after midnight
 cron.schedule("30 0 * * *", () => {
+    // fail safe for empty array
+    if(tempValues.length === 0) return;
     yesterdayAverage = parseFloat(
         (tempValues.reduce((a, b) => a + b) / 8).toFixed(1)
     );
