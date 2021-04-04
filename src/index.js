@@ -142,7 +142,9 @@ parser.on("data", async data => {
     solarIrradiance = Math.round((solarIrradiance * 0.125) / 1.67);
     // 23500 is just some arbitary number I just made up
     rainIntensity = 23500 - rainIntensity;
-    rainIntensity = rainIntensity < 0 ? 0 : Math.round(rainIntensity / 23500);
+    rainIntensity = rainIntensity < 0
+        ? 0
+        : Math.round((rainIntensity / 23500) * 100);
 
     // for 1 hour radiation average
     if(radiationValues.length >= 3600) radiationValues.shift();
