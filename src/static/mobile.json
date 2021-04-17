@@ -55,7 +55,7 @@
             "unit": "lx"
         },
         "solarIrradiance": {
-            "label": "Auringon säteilyteho",
+            "label": "Auringon teho",
             "unit": "W/m²"
         },
         "radiationAvg": {
@@ -67,7 +67,7 @@
             "unit": "°"
         },
         "absoluteHumidity": {
-            "label": "Absoluuttinen kosteus",
+            "label": "Abs. kosteus",
             "unit": "g/m³"
         },
         "feelsLikeTemp": {
