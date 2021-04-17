@@ -19,7 +19,7 @@ cajoe   | 08      | 00    | radiation
 ads1115 | 48      | ??    | solar irradiance & rain intensity
 
 Ads1115 is a 16-bit analog to digital convertor.  
-There's also a Vaisala Ultrasonic Wind Sensor WS425 in serialport. (The whole project is based around it basicly) 
+There's also a Vaisala Ultrasonic Wind Sensor WS425 in serialport. (The whole project is based around it basically) 
 
 ### Todo
 This is a global todo for everything connected to this project.  
