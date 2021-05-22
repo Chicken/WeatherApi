@@ -21,8 +21,17 @@ module.exports = class Database {
         let conn = await this.pool.getConnection();
         try {
             await conn.query(
-                `CREATE TABLE IF NOT EXISTS dailyAverage
-                (time double, temperature float);`
+                `CREATE TABLE IF NOT EXISTS daily (
+                time double,
+                temperature float,
+                rainAmount float
+                );`
+            );
+            await conn.query(
+                `CREATE TABLE IF NOT EXISTS hourly (
+                time double,
+                rainAmount float
+                );`
             );
             await conn.query(
                 `CREATE TABLE IF NOT EXISTS weather (
@@ -63,7 +72,7 @@ module.exports = class Database {
         let avg;
         try {
             let res = await conn.query(
-                `SELECT temperature FROM dailyAverage
+                `SELECT temperature FROM daily
                 ORDER BY time desc LIMIT 1`
             );
             avg = res[0]?.temperature ?? null;
@@ -107,17 +116,36 @@ module.exports = class Database {
     }
 
     /**
-     * Save daily temperature data to database
-     * @param {number} data - daily temperature average 
+     * Save daily data to database
+     * @param {Objet} data - daily data
      */
-    async saveDailyAvg(data) {
+    async saveDaily(data) {
         if(!this.ready) return;
         let conn = await this.pool.getConnection();
         try {
-            await conn.query("INSERT INTO dailyAverage VALUES (?, ?)", [
-                Date.now(), data
+            await conn.query("INSERT INTO daily VALUES (?, ?, ?)", [
+                Date.now(), data.temperature, data.rainAmount
             ]);
-            log("DB", 0, "Saved daily temperature to database.");
+            log("DB", 0, "Saved daily data to database.");
+        } catch (e) {
+            log("DB", 0, e, true);
+        } finally {
+            conn.release();
+        }
+    }
+
+    /**
+     * Save hourly data to database
+     * @param {number} data - hourly data
+     */
+    async saveHourly(data) {
+        if(!this.ready) return;
+        let conn = await this.pool.getConnection();
+        try {
+            await conn.query("INSERT INTO hourly VALUES (?, ?)", [
+                Date.now(), data.rainAmount
+            ]);
+            log("DB", 0, "Saved hourly data to database.");
         } catch (e) {
             log("DB", 0, e, true);
         } finally {

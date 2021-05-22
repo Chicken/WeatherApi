@@ -8,7 +8,9 @@ Live working version: https://weather.antti.codes/
 
 ---
 
-### I2C Address cheat sheet
+### Hardware
+
+#### I2C
 
 Device  | Address | Cmd   | Measuring 
 ---     | :---:   | :---: | ---
@@ -18,8 +20,14 @@ bh1750  | 5c      | 10    | light
 cajoe   | 08      | 00    | radiation
 ads1115 | 48      | ??    | solar irradiance & rain intensity
 
-Ads1115 is a 16-bit analog to digital convertor.  
-There's also a Vaisala Ultrasonic Wind Sensor WS425 in serialport. (The whole project is based around it basically) 
+Ads1115 is a 16-bit analog to digital convertor and can have multiple targets.
+
+#### Other
+
+Whole thing runs on a Raspberry Pi 4 Model B.  
+Many of the sensors go through an arduino before connecting to rpi.  
+Vaisala Ultrasonic Wind Sensor WS425 in serialport.  
+Unidentified rain sensor (rs1) from an old modded station.
 
 ### Todo
 This is a global todo for everything connected to this project.  
@@ -29,6 +37,7 @@ Includes the API, webpage, hardware and android application.
 - touch screen version
 - error webhook to discord
 - update rpi os
-- rain amount
 - length of day display
 - autoupdate
+- i18n via geoip
+- ws425 module

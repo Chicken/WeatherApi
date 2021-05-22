@@ -18,6 +18,7 @@ const readLight = require("./sensors/bh1750");
 const readRadiation = require("./sensors/cajoe");
 const readAnalog = require("./sensors/ads1115");
 
+const rain = new (require("./sensors/rs1"))();
 const db = new (require("./db"))();
 const forecast = new (require("./forecast"))();
 const {
@@ -37,11 +38,11 @@ let windValues = [],
     radiationValues = [],
     tempValues = [],
     ldata = {},
-    yesterdayAverage;
+    temperatureAverage;
 
 // db setup and fetch yesterdays average temperature
 db.setup().then(() => {
-    db.getDailyAverage().then(res => yesterdayAverage = res);
+    db.getDailyAverage().then(res => temperatureAverage = res);
 });
 
 setTimeout(() => {
@@ -53,20 +54,32 @@ setTimeout(() => {
     });
 }, 1000 * 30);
 
+// daily average temperature
 // every 3 hours
 cron.schedule("0 */3 * * *", () => {
     tempValues.push(ldata.temperature);
 });
 
-// 30min after midnight
-cron.schedule("30 0 * * *", () => {
-    // fail safe for empty array
-    if(tempValues.length === 0) return;
-    yesterdayAverage = parseFloat(
-        (tempValues.reduce((a, b) => a + b) / 8).toFixed(1)
+// hourly data
+cron.schedule("0 * * * *", () => {
+    db.saveHourly({
+        rainAmount: rain.getHourly()
+    });
+    rain.clearHourly();
+});
+
+// daily data
+// run a minute after midnight (race conditions)
+cron.schedule("1 0 * * *", () => {
+    temperatureAverage = parseFloat(
+        (tempValues.reduce((a, b) => a + b, 0) / 8).toFixed(1)
     );
-    db.saveDailyAvg(yesterdayAverage);
+    db.saveDailyAvg({
+        temperature: tempValues.length ? temperatureAverage : null,
+        rainAmount: rain.getDaily()
+    });
     tempValues = [];
+    rain.clearDaily();
 });
 
 // cors, web logging and static files
@@ -174,9 +187,10 @@ parser.on("data", async data => {
         windDirAvgText:
             getDirectionText(getAverage(windValues.map(v => v.direction))),
         temperature: temp,
-        dailyTempAvg: yesterdayAverage,
+        dailyTempAvg: temperatureAverage,
         humidity: hum,
         rainIntensity,
+        rainAmount: rain.getDaily(),
         pressure,
         lightness,
         solarIrradiance,

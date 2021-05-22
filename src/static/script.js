@@ -148,7 +148,8 @@ async function update() {
     fields.left[0].innerHTML =
     `Temperature: ${data.temperature} &#176;C <br>
     Feels Like Temp: ${data.feelsLikeTemp} &#176;C <br>
-    Yesterday Avg Temp: ${data.dailyTempAvg} &#176;C <br>`;
+    Yesterday Avg Temp: ${data.dailyTempAvg} &#176;C <br>
+    Dew Point: ${data.dewPoint} &#176;C <br>`;
 
     fields.left[1].innerHTML =
     `Wind Speed Avg: ${data.windSpeedAvg} m/s <br>
@@ -158,8 +159,8 @@ async function update() {
     fields.left[2].innerHTML =
     `Humidity: ${data.humidity} % <br>
     Abs. Humidity: ${data.absoluteHumidity} g/m³ <br>
-    Dew Point: ${data.dewPoint} &#176;C <br>
-    Rain Intensity: ${data.rainIntensity} %`;
+    Rain Intensity: ${data.rainIntensity} % <br>
+    Rain Amount ${data.rainAmount}`;
 
     fields.left[3].innerHTML =
     `Pressure: ${data.pressure} hPa <br>

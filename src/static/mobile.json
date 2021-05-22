@@ -7,7 +7,8 @@
             "feelsLikeTemp"
         ],
         [
-            "rainIntensity"
+            "rainIntensity",
+            "rainAmount"
         ],
         [
             "humidity",
@@ -77,6 +78,10 @@
         "rainIntensity": {
             "label": "Sateen intensiteetti",
             "unit": "%"
+        },
+        "rainAmount": {
+            "label": "Sateen määrä",
+            "unit": "mm"
         }
     }
 }
