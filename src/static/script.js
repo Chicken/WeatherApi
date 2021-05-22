@@ -160,7 +160,7 @@ async function update() {
     `Humidity: ${data.humidity} % <br>
     Abs. Humidity: ${data.absoluteHumidity} g/m³ <br>
     Rain Intensity: ${data.rainIntensity} % <br>
-    Rain Amount ${data.rainAmount}`;
+    Rain Amount: ${data.rainAmount} mm`;
 
     fields.left[3].innerHTML =
     `Pressure: ${data.pressure} hPa <br>
