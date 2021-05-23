@@ -5,6 +5,7 @@ module.exports = class Forecast {
     constructor() {
         this.fetchForecast();
         setInterval(this.fetchForecast.bind(this), 1000 * 60 * 10);
+        log("THIRD PARTY", 0, "Forecast loop started");
     }
 
     async fetchForecast() {

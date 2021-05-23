@@ -6,7 +6,7 @@ class Rain {
         this._sensor = new Gpio(24, "in", "rising");
         this._cumulative = {
             daily: 0,
-            hour: 0
+            hourly: 0
         };
         this._debouncing = false;
 
@@ -21,10 +21,6 @@ class Rain {
             this._debouncing = true;
             setTimeout(() => this._debouncing = false, 50);
         });
-
-        process.on("SIGINT", (() => {
-            this._sensor.unexport();
-        }).bind(this));
     }
 
     /**
@@ -53,6 +49,13 @@ class Rain {
      */
     clearlyDaily() {
         this._cumulative.daily = 0;
+    }
+
+    /**
+     * Unexports the gpio connection
+     */
+    close() {
+        this._sensor.unexport();
     }
 }
 

@@ -11,10 +11,15 @@ module.exports = class Database {
             password: process.env.DB_PW,
             connectionLimit: 5
         });
+        log("DB", 0, "Connection pool initialized");
     }
 
     get ready() {
         return !this.readyPhase;
+    }
+
+    async close() {
+        await this.pool.end();
     }
 
     async setup() {
@@ -60,6 +65,7 @@ module.exports = class Database {
         } finally {
             conn.release();
             this.readyPhase--;
+            log("DB", 0, "Ensured table existance");
         }
     }
     

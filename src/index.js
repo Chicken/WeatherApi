@@ -1,6 +1,20 @@
 // dependencies and variables
 require("dotenv").config();
 
+const {
+    arrAvg,
+    getSpeedText,
+    getDirectionText,
+    getAverage,
+    dewPoint,
+    absoluteHumidity,
+    feelsLikeTemp,
+    log,
+    webLog
+} = require("./utils");
+
+log("APP", 0, "Startup started");
+
 const cron = require("node-cron");
 
 const SerialPort = require("serialport");
@@ -21,17 +35,6 @@ const readAnalog = require("./sensors/ads1115");
 const rain = new (require("./sensors/rs1"))();
 const db = new (require("./db"))();
 const forecast = new (require("./forecast"))();
-const {
-    arrAvg,
-    getSpeedText,
-    getDirectionText,
-    getAverage,
-    dewPoint,
-    absoluteHumidity,
-    feelsLikeTemp,
-    log,
-    webLog
-} = require("./utils");
 
 // global variables to save stuff
 let windValues = [],
@@ -106,7 +109,7 @@ app.get("/api/mobile", (_req, res) => {
 });
 
 // listen for requests
-app.listen(process.env.PORT, () => {
+const server = app.listen(process.env.PORT, () => {
     log("APP", 0, "Server online");
 });
 
@@ -204,4 +207,28 @@ parser.on("data", async data => {
     log("SENSOR", 2, "Completed a cycle");
 });
 
-log("APP", 0, "Started");
+log("APP", 0, "Startup finished");
+
+let exit = async (cleanup) => {
+    if (cleanup) {
+        try {
+            server.close();
+            rain.close();
+            await db.close();
+        } catch(e) {
+            log("APP", 0, "Error during exit cleanup:\n" + e.toString(), true);
+        }
+    } else {
+        process.exit();
+    }
+};
+
+process.on("exit", () => {
+    log("APP", 0, "Exited");
+});
+
+process.on("beforeExit", exit.bind(null, true));
+
+process.on("SIGINT", exit.bind(null, false));
+
+process.on("uncaughtException", exit.bind(null, false));
