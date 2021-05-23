@@ -74,7 +74,7 @@ cron.schedule("1 0 * * *", () => {
     temperatureAverage = parseFloat(
         (tempValues.reduce((a, b) => a + b, 0) / 8).toFixed(1)
     );
-    db.saveDailyAvg({
+    db.saveDaily({
         temperature: tempValues.length ? temperatureAverage : null,
         rainAmount: rain.getDaily()
     });
