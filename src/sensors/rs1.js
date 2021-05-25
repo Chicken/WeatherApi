@@ -19,7 +19,7 @@ class Rain {
             this._cumulative.daily += 0.5;
             this._cumulative.hourly += 0.5;
             this._debouncing = true;
-            setTimeout(() => this._debouncing = false, 50);
+            setTimeout(() => this._debouncing = false, 1000);
         });
     }
 
