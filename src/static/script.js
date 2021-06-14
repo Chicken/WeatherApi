@@ -148,7 +148,7 @@ async function update() {
     fields.left[0].innerHTML =
     `Temperature: ${data.temperature} &#176;C <br>
     Feels Like Temp: ${data.feelsLikeTemp} &#176;C <br>
-    Yesterday Avg Temp: ${data.dailyTempAvg} &#176;C <br>
+    Average Temp: ${data.dailyTempAvg} &#176;C <br>
     Dew Point: ${data.dewPoint} &#176;C <br>`;
 
     fields.left[1].innerHTML =
