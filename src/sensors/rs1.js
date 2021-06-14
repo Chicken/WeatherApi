@@ -47,7 +47,7 @@ class Rain {
     /**
      * Clears the cumulative daily counter
      */
-    clearlyDaily() {
+    clearDaily() {
         this._cumulative.daily = 0;
     }
 
