@@ -20,7 +20,7 @@
         "dotenv": "^10.0.0",
         "express": "^4.17.1",
         "i2c-bus": "^5.2.2",
-        "mariadb": "^2.5.2",
+        "mariadb": "^2.5.4",
         "node-cron": "^3.0.0",
         "onoff": "^6.0.3",
         "raspi-node-sht31": "^1.0.1",
