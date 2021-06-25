@@ -24,7 +24,7 @@
         "node-cron": "^3.0.0",
         "onoff": "^6.0.3",
         "raspi-node-sht31": "^1.0.1",
-        "serialport": "^9.1.0"
+        "serialport": "^9.2.0"
     },
     "devDependencies": {
         "eslint": "^7.29.0"
