@@ -49,7 +49,10 @@ module.exports.getSpeedText = speed => {
  * @param {Array<Number>} arr - array of numbers
  * @returns {Number} average 
  */
-module.exports.arrAvg = arr => arr.reduce((a, b) => a + b, 0) / arr.length;
+module.exports.arrAvg = arr => {
+    let farr = arr.filter(v => !isNaN(Number(v)));
+    return farr.reduce((a, b) => a + b, 0) / farr.length;
+};
 
 /**
  * Function to turn degrees into radians
