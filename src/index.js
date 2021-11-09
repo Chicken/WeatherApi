@@ -159,7 +159,7 @@ parser.on("data", async data => {
     ]);
 
     // correction math for analog sensors
-    solarIrradiance = Math.round((solarIrradiance * 0.125) / 1.67);
+    solarIrradiance = Math.max(0, Math.round((solarIrradiance * 0.125) / 1.67) - 25);
     // 23500 is just some arbitary number I just made up
     rainIntensity = 23500 - rainIntensity;
     rainIntensity = rainIntensity < 0
