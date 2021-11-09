@@ -154,7 +154,7 @@ async function update() {
     fields.left[1].innerHTML =
     `Wind Speed Avg: ${data.windSpeedAvg} m/s <br>
     Wind Dir Avg: ${data.windDirAvg} &#176; <br>
-    Wing Gust: ${data.windGust} m/s`;
+    Wind Gust: ${data.windGust} m/s`;
 
     fields.left[2].innerHTML =
     `Humidity: ${data.humidity} % <br>
