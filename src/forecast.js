@@ -11,7 +11,7 @@ module.exports = class Forecast {
     async fetchForecast() {
         log("THIRD PARTY", 2, "Forecast data fetched");
         let res = await bent(200, "json")(
-            "https://api.openweathermap.org/data/2.5/onecall" +
+            "https://api.openweathermap.org/data/3.0/onecall" +
             "?lat=65.012615&lon=25.471453&units=metric&lang=en" +
             `&exclude=minutely&appid=${process.env.OPENWEATHERMAP}`);
         this.latest = {
