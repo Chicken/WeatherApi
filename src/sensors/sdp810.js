@@ -17,7 +17,9 @@ module.exports = async () => {
         if (crc(Uint8Array.prototype.slice.call(buf, 0, 2)) !== buf[2]) throw new Error("Crc 1 failed");
         if (crc(Uint8Array.prototype.slice.call(buf, 3, 5)) !== buf[5]) throw new Error("Crc 2 failed");
         if (crc(Uint8Array.prototype.slice.call(buf, 6, 8)) !== buf[8]) throw new Error("Crc 3 failed");
-        let dp = ((buf[0] << 8) | buf[1]) / ((buf[6] << 8) | buf[7]);
+        const raw = ((buf[0] << 8) | buf[1]);
+        if (raw & 0x8000) raw -= 0x10000
+        let dp = raw / ((buf[6] << 8) | buf[7]);
         log("SENSOR", 2, `New differential pressure data, ${dp}`);
         await i2c1.close();
         return dp
