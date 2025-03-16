@@ -31,7 +31,6 @@ const readPressure = require("./sensors/bmp180");
 const readLight = require("./sensors/bh1750");
 const readRadiation = require("./sensors/cajoe");
 const readAnalog = require("./sensors/ads1115");
-const readDifferentialPressure = require("./sensors/sdp810");
 
 const rain = new (require("./sensors/rs1"))();
 const db = new (require("./db"))();
@@ -150,15 +149,13 @@ parser.on("data", async data => {
         pressure,
         lightness,
         radiation,
-        [ solarIrradiance, rainIntensity ],
-        differentialPressure
+        [ solarIrradiance, rainIntensity ]
     ] = await Promise.all([
         readTemp(),
         readPressure(),
         readLight(),
         readRadiation(),
-        readAnalog(),
-        readDifferentialPressure()
+        readAnalog()
     ]);
 
     // correction math for analog sensors
@@ -200,7 +197,6 @@ parser.on("data", async data => {
         pressure,
         lightness,
         solarIrradiance,
-        differentialPressure: parseFloat(differentialPressure.toFixed(2)),
         radiationNow: radiation,
         radiationAvg: parseFloat(arrAvg(radiationValues).toFixed(2)),
         dewPoint: parseFloat(dewPoint(temp, hum).toFixed(1)),

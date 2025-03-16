@@ -19,7 +19,6 @@ bmp180  | 77      | ??    | pressure
 bh1750  | 5c      | 10    | light
 cajoe   | 08      | 00    | radiation
 ads1115 | 48      | ??    | solar irradiance & rain intensity
-sdp810  | 25      | 362F  | differential pressure
 
 Ads1115 is a 16-bit analog to digital convertor and can have multiple targets.
 
